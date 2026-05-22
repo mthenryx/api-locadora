@@ -17,7 +17,7 @@ const validarDados = function (diretor) {
     if (diretor.nome == undefined || diretor.nome == '' || diretor.nome == null || diretor.nome.length > 100 || !isNaN(diretor.nome)) {
         customMessage.ERROR_BAD_REQUEST.field = '[NOME] INVÁLIDA'
         return customMessage.ERROR_BAD_REQUEST
-    } else if (diretor.biografia == undefined || diretor.biografia == '' || diretor.biografia == null || !isNaN(diretor.biografia)) {
+    } else if (diretor.biografia == undefined || diretor.biografia == null || !isNaN(diretor.biografia)) {
         customMessage.ERROR_BAD_REQUEST.field = '[BIOGRAFIA] INVÁLIDA'
         return customMessage.ERROR_BAD_REQUEST
     } else if (diretor.data_nascimento == undefined || diretor.data_nascimento == '' || diretor.data_nascimento == null || diretor.data_nascimento.length != 10) {

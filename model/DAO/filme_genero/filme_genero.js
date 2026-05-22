@@ -96,7 +96,33 @@ const selectByIdFilme = async function (idFilme) {
                             on tbl_filme.id = tbl_filme_genero.id_filme
                         inner join tbl_genero
                             on tbl_genero.id = tbl_filme_genero.id_genero 
-                    where id = ${id};`
+
+                    where tbl_filme.id = ${idFilme};`
+
+        let result = await knexConection.raw(sql)
+
+        if (Array.isArray(result)) {
+            return result[0]
+        } else {
+            return false
+        }
+
+    } catch (error) {
+        return false
+    }
+}
+
+//Função para retornar os dados do filme filtrando pelo id do genero
+const selectFilmesByIdGenero = async function (idGenero) {
+    try {
+        let sql = ` select tbl_filme.*
+                    from tbl_genero
+                        inner join tbl_filme_genero
+                            on tbl_filme.id = tbl_filme_genero.id_filme
+                        inner join tbl_genero
+                            on tbl_genero.id = tbl_filme_genero.id_genero 
+                            
+                    where tbl_genero.id = ${idGenero};`
 
         let result = await knexConection.raw(sql)
 
@@ -132,5 +158,7 @@ module.exports = {
     updateFilmeGenero,
     selectAllFilmeGenero,
     selectByIdFilmeGenero,
-    deleteFilmeGenero
+    deleteFilmeGenero,
+    selectByIdFilme,
+    selectFilmesByIdGenero
 }

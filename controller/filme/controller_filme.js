@@ -14,6 +14,8 @@ const filmeDAO = require('../../model/DAO/filme/filme.js')
 //Import das controllers
 const controllerClassificacao = require('../classificacao/controller_classificacao.js')
 
+const controllerFilmeGenero = require('./controller_filme_genero.js')
+
 const validarDados = async function (filme) {
 
      //Cria uma copia dos JSON do arquivo de configuração de mensagens
@@ -70,19 +72,36 @@ const inserirNovoFilme = async function (filme, contentType) {
      let customMessages = JSON.parse(JSON.stringify(configMessages))
 
      try {
+
           if (String(contentType).toLocaleUpperCase() == 'APPLICATION/JSON') {
 
+               //Chama a função para validar a entrada de dados do filme
                let validar = await validarDados(filme)
                //Returna um JSON de error caso algum atributo seja inválido,
                //senão retorna um false (Não teve erro)
                if (validar) {
                     return validar //400
                } else {
+
                     let result = await filmeDAO.insertFilme(await tratarDados(filme))
 
                     if (result) { //201
                          //Cria o ID no Json do filme e adiciona o Id gerado
                          filme.id = result 
+
+                         //Manipulação de dados para inserir os generos relacionados ao filme
+                         //Percorre o array de generos que chegará na 
+                         //requisição pelo objeto Filme
+                         for (itemFilme of filme.genero) {
+
+                              let filmeGenero = {
+                                   "id_filme": filme.id,
+                                   "id_genero": itemFilme.id
+                              }
+
+                              let resultFilmeGenero = await controllerFilmeGenero.inserirNovoFilmeGenero(filmeGenero)
+                              console.log(resultFilmeGenero)
+                         }
 
                          customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
                          customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_CREATED_ITEM.status_code

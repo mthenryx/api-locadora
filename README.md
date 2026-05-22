@@ -1,4 +1,4 @@
-# 🎬 API RESTful - Locadora de Filmes
+# API RESTful - Locadora de Filmes
 
 API RESTful desenvolvida para gerenciamento de uma locadora de filmes, com integração ao MySQL e suporte a operações CRUD completas em múltiplas entidades.
 
@@ -20,6 +20,9 @@ O projeto implementa operações CRUD (Create, Read, Update, Delete) e segue boa
 - Knex.js (query builder)  
 - Body-parser  
 - CORS  
+- Postman (Testar EDNPOINT)
+- Swagger (Documentação)
+
 
 ---
 
