@@ -176,7 +176,7 @@ const buscarGeneroIdFilme = async function (idFilme) {
             return customMessages.ERROR_BAD_REQUEST // 400
         } else {
             //Chama a função do DAO para pesquisar o filme pelo id
-            let result = await filmeGeneroDAO.selectByIdFilmeGenero(idFilme)
+            let result = await filmeGeneroDAO.selectByIdFilme(idFilme)
 
             //Validação para verificar se o DAO retornou dados ou um false
             if (result) {
@@ -267,6 +267,29 @@ const excluirFilmeGenero = async function (id) {
     }
 }
 
+const excluirGenerosIdFilme = async function (idFilme) {
+
+    let customMessage = JSON.parse(JSON.stringify(configMessages))
+
+    try {
+
+        let result = await filmeGeneroDAO.deleteGenerosByIdFilme(idFilme)
+
+        if (result) {
+            customMessage.DEFAULT_MESSAGE.status = customMessage.SUCCESS_DELETE_ITEM.status
+            customMessage.DEFAULT_MESSAGE.status_code = customMessage.SUCCESS_DELETE_ITEM.status_code
+            customMessage.DEFAULT_MESSAGE.message = customMessage.SUCCESS_DELETE_ITEM.message
+
+            return customMessage.DEFAULT_MESSAGE //204 (Deletado)
+        } else {
+            return customMessage.ERROR_INTERNAL_SERVER_MODEL //500 (Model)
+        }
+
+    } catch (error) {
+        return customMessage.ERROR_INTERNAL_SERVER_CONTROLLER
+    }
+}
+
 module.exports = {
     inserirNovoFilmeGenero,
     atualizarFilmeGenero,
@@ -274,5 +297,6 @@ module.exports = {
     buscarFilmeGenero,
     excluirFilmeGenero,
     buscarGeneroIdFilme,
-    buscarFilmesIDGenero
+    buscarFilmesIDGenero,
+    excluirGenerosIdFilme
 }

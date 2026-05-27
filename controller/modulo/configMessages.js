@@ -24,10 +24,11 @@ const ERROR_NOT_FOUND                   = {status: false, status_code:404, messa
 const ERROR_CONTENT_TYPE                = {status: false, status_code:415, message: 'Não foi possivel realizar a requisição, pois o formato de dados encaminhado não é suportados pelo, servidor, apenas deve ser utilizado JSON.'}
 
 //Mensagens de SUCESSO do projeto de filmes
-const SUCCESS_CREATED_ITEM  = {status: true, status_code: 201, message: 'Item inserido com sucesso'}
-const SUCCESS_RESPONSE      = {status: true, status_code: 200}
-const SUCCESS_UPDATED_ITEM  = {status: true, status_code: 200, message: 'Item atualizado com sucesso'}
-const SUCCESS_DELETE_ITEM   = {status: true, status_code: 204}
+const SUCCESS_CREATED_ITEM         = {status: true, status_code: 201, message: 'Item inserido com sucesso'}
+const SUCCESS_RESPONSE             = {status: true, status_code: 200}
+const SUCCESS_UPDATED_ITEM         = {status: true, status_code: 200, message: 'Item atualizado com sucesso'}
+const SUCCESS_DELETE_ITEM          = {status: true, status_code: 204}
+const SUCCESS_CREATED_ITEM_WARNING = {status: true, status_code:201, message: 'Item inserido com sucesso, porém alguns dados tiveram problema no cadastro [DADOS DE RELACIONAMENTO]'}
 
 module.exports = {
     DEFAULT_MESSAGE,
@@ -39,5 +40,6 @@ module.exports = {
     ERROR_NOT_FOUND,
     SUCCESS_RESPONSE,
     SUCCESS_UPDATED_ITEM,
-    SUCCESS_DELETE_ITEM
+    SUCCESS_DELETE_ITEM,
+    SUCCESS_CREATED_ITEM_WARNING
 }

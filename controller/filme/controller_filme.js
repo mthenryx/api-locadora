@@ -100,7 +100,11 @@ const inserirNovoFilme = async function (filme, contentType) {
                               }
 
                               let resultFilmeGenero = await controllerFilmeGenero.inserirNovoFilmeGenero(filmeGenero)
-                              console.log(resultFilmeGenero)
+
+                              //Validação para verificar se todos os itens de relacionamento foram inseridos
+                              if(!resultFilmeGenero.status){
+                                   return customMessages.SUCCESS_CREATED_ITEM_WARNING //201 com alerta de cadastro
+                              }
                          }
 
                          customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
@@ -143,7 +147,29 @@ const atualizarFilme = async function (filme, id, contentType) {
                          //Chama a função para atualizar o filme no BD
                          let result = await filmeDAO.updateFilme(await tratarDados(filme))
 
+                         //Excluir as relações entre o filme e os generos (tabela de relação)
+
                          if (result) {
+
+                              let resultDeleteGeneros = await controllerFilmeGenero.excluirGenerosIdFilme(filme.id)
+
+                              if(resultDeleteGeneros.status){
+                                   for (itemFilme of filme.genero) {
+
+                                        let filmeGenero = {
+                                             "id_filme": filme.id,
+                                             "id_genero": itemFilme.id
+                                        }
+          
+                                        let resultFilmeGenero = await controllerFilmeGenero.inserirNovoFilmeGenero(filmeGenero)
+          
+                                        //Validação para verificar se todos os itens de relacionamento foram inseridos
+                                        if(!resultFilmeGenero.status){
+                                             return customMessages.SUCCESS_CREATED_ITEM_WARNING //201 com alerta de cadastro
+                                        }
+                                   }
+                              }
+
                               customMessage.DEFAULT_MESSAGE.status = customMessage.SUCCESS_UPDATED_ITEM.status
                               customMessage.DEFAULT_MESSAGE.status_code = customMessage.SUCCESS_UPDATED_ITEM.status_code
                               customMessage.DEFAULT_MESSAGE.message = customMessage.SUCCESS_UPDATED_ITEM.message
@@ -185,7 +211,6 @@ const listarFilme = async function () {
                //Validação para verificar se o conteúdo do array tem dados de retorno 
                //OU se esta vasio
                if (result.length > 0) {
-
                     //Manipulação dos dados da Classificação
                     //Percorre o array de filmes 
                     for (filme of result) {
@@ -198,6 +223,13 @@ const listarFilme = async function () {
                               filme.classificacao = resultClassificacao.response.classificacao
                               //Apaga o id_classificao do JSON de filme
                               delete filme.id_classificacao
+                         }
+
+                         //Manipulação de dados para retornar os generos relacionados ao filme
+                         let resultGenero = await controllerFilmeGenero.buscarGeneroIdFilme(filme.id)
+
+                         if(resultGenero.status){
+                              filme.genero = resultGenero.response.filme_genero
                          }
                     }
 
@@ -246,6 +278,13 @@ const buscarFilme = async function (id) {
                               filme.classificacao = resultClassificacao.response.classificacao
                               //Apaga o id_classificao do JSON de filme
                               delete filme.id_classificacao
+                         }
+
+                         //Manipulação de dados para retornar os generos relacionados ao filme
+                         let resultGenero = await controllerFilmeGenero.buscarGeneroIdFilme(filme.id)
+
+                         if(resultGenero.status){
+                              filme.genero = resultGenero.response.filme_genero
                          }
                     }
 

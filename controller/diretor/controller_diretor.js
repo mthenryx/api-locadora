@@ -23,10 +23,10 @@ const validarDados = function (diretor) {
     } else if (diretor.data_nascimento == undefined || diretor.data_nascimento == '' || diretor.data_nascimento == null || diretor.data_nascimento.length != 10) {
         customMessage.ERROR_BAD_REQUEST.field = '[DATA_NASCIMENTO] INVÁLIDA'
         return customMessage.ERROR_BAD_REQUEST
-    } else if (diretor.id_nacionalidade == undefined || diretor.id_nacionalidade == '' || diretor.id_nacionalidade == null || !isNaN(diretor.id_nacionalidade)) {
+    } else if (diretor.id_nacionalidade == undefined || diretor.id_nacionalidade == '' || diretor.id_nacionalidade == null || isNaN(diretor.id_nacionalidade)) {
         customMessage.ERROR_BAD_REQUEST.field = '[ID_NACIONALIDADE] INVÁLIDA'
         return customMessage.ERROR_BAD_REQUEST
-    } else if (diretor.id_sexo == undefined || diretor.id_sexo == '' || diretor.id_sexo == null || !isNaN(diretor.id_sexo)) {
+    } else if (diretor.id_sexo == undefined || diretor.id_sexo == '' || diretor.id_sexo == null || isNaN(diretor.id_sexo)) {
         customMessage.ERROR_BAD_REQUEST.field = '[ID_SEXO] INVÁLIDA'
         return customMessage.ERROR_BAD_REQUEST
     } else {
@@ -43,7 +43,7 @@ const tratarDados = function (diretor) {
     return diretor
 }
 
-const inserirNovoGenero = async function (diretor, contentType) {
+const inserirNovoDiretor = async function (diretor, contentType) {
 
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
@@ -78,7 +78,7 @@ const inserirNovoGenero = async function (diretor, contentType) {
     }
 }
 
-const atualizarGenero = async function (diretor, id, contentType) {
+const atualizarDiretor = async function (diretor, id, contentType) {
 
     let customMessage = JSON.parse(JSON.stringify(configMessages))
 
@@ -86,7 +86,7 @@ const atualizarGenero = async function (diretor, id, contentType) {
 
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
 
-            let resultBuscarDiretor = await buscarGenero(id)
+            let resultBuscarDiretor = await buscarDiretor(id)
 
             if (resultBuscarDiretor.status) {
 
@@ -126,7 +126,7 @@ const atualizarGenero = async function (diretor, id, contentType) {
     }
 }
 
-const listarGenero = async function () {
+const listarDiretor = async function () {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
@@ -152,7 +152,7 @@ const listarGenero = async function () {
     }
 }
 
-const buscarGenero = async function (id) {
+const buscarDiretor = async function (id) {
 
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
@@ -163,7 +163,7 @@ const buscarGenero = async function (id) {
             return customMessages.ERROR_BAD_REQUEST // 400
         } else {
             //Chama a função do DAO para pesquisar o filme pelo id
-            let result = await diretorDAO.selectByIdGenero(id)
+            let result = await diretorDAO.selectByIdDiretor(id)
 
             //Validação para verificar se o DAO retornou dados ou um false
             if (result) {
@@ -171,7 +171,7 @@ const buscarGenero = async function (id) {
                 if (result.length > 0) {
                     customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
                     customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
-                    customMessages.DEFAULT_MESSAGE.response.genero = result
+                    customMessages.DEFAULT_MESSAGE.response.diretor = result
 
                     return customMessages.DEFAULT_MESSAGE //200
                 } else {
@@ -187,16 +187,16 @@ const buscarGenero = async function (id) {
     }
 }
 
-const excluirGenero = async function (id) {
+const excluirDiretor = async function (id) {
 
     let customMessage = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        let resultBuscarGenero = await buscarGenero(id)
+        let resultBuscarDiretor = await buscarDiretor(id)
 
-        if (resultBuscarGenero.status) {
+        if (resultBuscarDiretor.status) {
 
-            let result = await diretorDAO.deleteGenero(id)
+            let result = await diretorDAO.deleteDiretor(id)
 
             if (result) {
                 customMessage.DEFAULT_MESSAGE.status = customMessage.SUCCESS_DELETE_ITEM.status
@@ -208,7 +208,7 @@ const excluirGenero = async function (id) {
                 return customMessage.ERROR_INTERNAL_SERVER_MODEL //500 (Model)
             }
         } else {
-            return resultBuscarGenero //400(id inválido) ou 404(não encontrado) ou 500
+            return resultBuscarDiretor //400(id inválido) ou 404(não encontrado) ou 500
         }
     } catch (error) {
         return customMessage.ERROR_INTERNAL_SERVER_CONTROLLER
@@ -216,9 +216,9 @@ const excluirGenero = async function (id) {
 }
 
 module.exports = {
-    inserirNovoGenero,
-    atualizarGenero,
-    listarGenero,
-    buscarGenero,
-    excluirGenero
+    inserirNovoDiretor,
+    atualizarDiretor,
+    listarDiretor,
+    buscarDiretor,
+    excluirDiretor
 }

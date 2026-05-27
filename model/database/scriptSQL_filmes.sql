@@ -47,7 +47,7 @@ insert into tbl_filme (
     '3'
 );
 
-select * from tbl_filme order by id desc;
+select * from tbl_filme_genero order by id desc;
 
 select * from tbl_filme where id = 24;
 
@@ -85,6 +85,19 @@ create table tbl_genero (
     genero	varchar(20) not null
 );
 
+create table tbl_filme_genero (
+	id 			int not null auto_increment primary key,
+    id_filme 	int not null,
+    id_genero 	int not null,
+    
+    constraint FK_FILME_FILME_GENERO
+    foreign key (id_filme)
+    references tbl_filme(id),
+    
+    constraint FK_GENERO_FILME_GENERO
+    foreign key (id_genero)
+    references tbl_genero(id)
+);
 
 create table tbl_fotos (
 	id 		 int not null auto_increment primary key,
