@@ -1,7 +1,7 @@
 /****************************************************************************************************** 
-* Objetivo: Arquivo responsável pelo CRUD de dados das Diretor no banco de dados 
+* Objetivo: Arquivo responsável pelo CRUD de dados das ator no banco de dados 
 * MySQL
-* Data: 20/05/2026
+* Data: 29/05/2026
 * Autor: Matheus
 * Versão: 1.0
 *******************************************************************************************************/
@@ -12,20 +12,20 @@ const knexDataBaseConfig = require('../../database_config/knexConfig.js')
 
 const knexConection = knex(knexDataBaseConfig.development)
 
-const insertDiretor = async function (diretor) {
+const insertAtor = async function (ator) {
     try {
-        let sql = `insert into tbl_diretor (
+        let sql = `insert into tbl_ator (
             nome,
             biografia,
             data_nascimento,
             id_nacionalidade,
             id_sexo 
         ) values (
-            '${diretor.nome}',
-            if('${diretor.biografia}' = '', null, '${diretor.biografia}'),
-            '${diretor.data_nascimento}',
-            ${diretor.id_nacionalidade},
-            ${diretor.id_sexo}
+            '${ator.nome}',
+            if('${ator.biografia}' = '', null, '${ator.biografia}'),
+            '${ator.data_nascimento}',
+            ${ator.id_nacionalidade},
+            ${ator.id_sexo}
         );`
 
         let result = await knexConection.raw(sql)
@@ -40,15 +40,15 @@ const insertDiretor = async function (diretor) {
     }
 }
 
-const updateDiretor = async function (diretor) {
+const updateAtor = async function (ator) {
     try {
-        let sql = `update tbl_diretor set 
-                            nome             =  '${diretor.nome}',
-                            biografia        =  if('${diretor.biografia}' = '', null, '${diretor.biografia}'),
-                            data_nascimento  =  '${diretor.data_nascimento}',
-                            id_nacionalidade =  ${diretor.id_nacionalidade},
-                            id_sexo          =  ${diretor.id_sexo}
-                    where id = ${diretor.id};`
+        let sql = `update tbl_ator set 
+                            nome             =  '${ator.nome}',
+                            biografia        =  if('${ator.biografia}' = '', null, '${ator.biografia}'),
+                            data_nascimento  =  '${ator.data_nascimento}',
+                            id_nacionalidade =  ${ator.id_nacionalidade},
+                            id_sexo          =  ${ator.id_sexo}
+                    where id = ${ator.id};`
 
         let result = await knexConection.raw(sql)
 
@@ -63,9 +63,9 @@ const updateDiretor = async function (diretor) {
     }
 }
 
-const selectAllDiretor = async function () {
+const selectAllAtor = async function () {
     try {
-        let sql = 'select * from tbl_diretor order by id desc'
+        let sql = 'select * from tbl_ator order by id desc'
 
         let result = await knexConection.raw(sql)
 
@@ -79,9 +79,9 @@ const selectAllDiretor = async function () {
     }
 }
 
-const selectByIdDiretor = async function (id) {
+const selectByIdAtor = async function (id) {
     try {
-        let sql = `select * from tbl_diretor where id = ${id};`
+        let sql = `select * from tbl_ator where id = ${id};`
 
         let result = await knexConection.raw(sql)
 
@@ -96,9 +96,9 @@ const selectByIdDiretor = async function (id) {
     }
 }
 
-const deleteDiretor = async function (id) {
+const deleteAtor = async function (id) {
     try {
-        let sql = `delete from tbl_diretor where id = ${id};`
+        let sql = `delete from tbl_ator where id = ${id};`
 
         let result = await knexConection.raw(sql)
 
@@ -113,9 +113,9 @@ const deleteDiretor = async function (id) {
 }
 
 module.exports = {
-    insertDiretor,
-    updateDiretor,
-    selectAllDiretor,
-    selectByIdDiretor,
-    deleteDiretor
+    insertAtor,
+    updateAtor,
+    selectAllAtor,
+    selectByIdAtor,
+    deleteAtor
 }

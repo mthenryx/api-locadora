@@ -121,13 +121,52 @@ create table tbl_diretor (
 	references tbl_sexo(id)
 );
 
+select * from tbl_ator;
+
+create table tbl_ator (
+	id 		    	  int not null auto_increment primary key,
+    nome     		  varchar(100) not null,
+    biografia   	  text,
+    data_nascimento   date not null,
+    id_nacionalidade  int not null,
+    id_sexo 		  int not null,
+    
+	constraint FK_NACIONALIDADE_ATOR
+	foreign key (id_nacionalidade)
+	references tbl_nacionalidade(id),
+        
+	constraint FK_SEXO_ATOR
+	foreign key (id_sexo)
+	references tbl_sexo(id)
+);
+
+create table tbl_ator (
+	id 		    	  int not null auto_increment primary key,
+    nome     		  varchar(100) not null,
+    biografia   	  text,
+    data_nascimento   date not null,
+    id_nacionalidade  int not null,
+    id_sexo 		  int not null,
+    
+	constraint FK_NACIONALIDADE_ATOR
+	foreign key (id_nacionalidade)
+	references tbl_nacionalidade(id),
+        
+	constraint FK_SEXO_ATOR
+	foreign key (id_sexo)
+	references tbl_sexo(id)
+);
+
 delete from tbl_filme;
 
-alter table tbl_filme
-	add column id_classificacao int not null,
-    add constraint FK_CLASSIFICACAO_FILME
-		foreign key (id_classificacao)
-		references tbl_classificacao(id);
+alter table tbl_ator
+	add	constraint FK_NACIONALIDADE_DIRETOR
+	foreign key (id_nacionalidade)
+	references tbl_nacionalidade(id),
+        
+	add constraint FK_SEXO_DIRETOR
+	foreign key (id_sexo)
+	references tbl_sexo(id);
         
 desc tbl_filme;
         

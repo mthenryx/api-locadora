@@ -1,6 +1,6 @@
 /****************************************************************************************************** 
 * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados
-*   para realizar o CRUD de genero
+*   para realizar o CRUD de Filme
 * Data: 22/05/2026
 * Autor: Matheus
 * Versão: 1.0

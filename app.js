@@ -34,6 +34,8 @@ const controllerNacionalidade    = require("./controller/nacionalidade/controlle
 const controllerFotos            = require("./controller/fotos/controller_fotos.js")
 const controllerGenero           = require("./controller/genero/controller_genero.js")
 const controllerDiretor          = require("./controller/diretor/controller_diretor.js")
+const controllerAtor             = require("./controller/ator/controller_ator.js")
+const controllerPapel            = require("./controller/papel/controller_papel.js")
 
 //ENDPOINTS FILME
 app.post('/v1/senai/locadora/filme', bodyParserJSON, async function (request, response) {
@@ -363,7 +365,7 @@ app.delete('/v1/senai/locadora/genero/:id', async function (request, response) {
     response.json(result)
 })
 
-//ENDPOINTS Diretor
+//ENDPOINTS DIRETOR
 app.post('/v1/senai/locadora/diretor', bodyParserJSON, async function (request, response) {
     let dados = request.body
 
@@ -411,6 +413,112 @@ app.delete('/v1/senai/locadora/diretor/:id', async function (request, response) 
     let id = request.params.id
 
     let result = await controllerDiretor.excluirDiretor(id)
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
+//ENDPOINTS ATOR
+app.post('/v1/senai/locadora/ator', bodyParserJSON, async function (request, response) {
+    let dados = request.body
+
+    let contentType = request.headers['content-type']
+
+    let result = await controllerAtor.inserirNovoAtor(dados, contentType)
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
+app.get('/v1/senai/locadora/ator', async function (request, response) {
+
+    let result = await controllerAtor.listarAtor()
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
+app.get('/v1/senai/locadora/ator/:id', async function (request, response) {
+    let id = request.params.id
+
+    let result = await controllerAtor.buscarAtor(id)
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
+app.put('/v1/senai/locadora/ator/:id', bodyParserJSON, async function (request, response) {
+
+    let contentType = request.headers['content-type']
+
+    let id = request.params.id
+
+    let dados = request.body
+
+    let result = await controllerAtor.atualizarAtor(dados, id, contentType)
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
+app.delete('/v1/senai/locadora/ator/:id', async function (request, response) {
+
+    let id = request.params.id
+
+    let result = await controllerAtor.excluirAtor(id)
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
+//ENDPOINTS PAPEL
+app.post('/v1/senai/locadora/papel', bodyParserJSON, async function (request, response) {
+    let dados = request.body
+
+    let contentType = request.headers['content-type']
+
+    let result = await controllerPapel.inserirNovoPapel(dados, contentType)
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
+app.get('/v1/senai/locadora/papel', async function (request, response) {
+
+    let result = await controllerPapel.listarPapel()
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
+app.get('/v1/senai/locadora/papel/:id', async function (request, response) {
+    let id = request.params.id
+
+    let result = await controllerPapel.buscarPapelId(id)
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
+app.put('/v1/senai/locadora/papel/:id', bodyParserJSON, async function (request, response) {
+
+    let contentType = request.headers['content-type']
+
+    let id = request.params.id
+
+    let dados = request.body
+
+    let result = await controllerPapel.atualizarPapel(dados, id, contentType)
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
+app.delete('/v1/senai/locadora/papel/:id', async function (request, response) {
+
+    let id = request.params.id
+
+    let result = await controllerPapel.excluirPapel(id)
 
     response.status(result.status_code)
     response.json(result)

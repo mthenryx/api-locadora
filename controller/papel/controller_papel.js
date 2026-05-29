@@ -1,23 +1,23 @@
 /****************************************************************************************************** 
 * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados
-*   para realizar o CRUD de Nacionalidade
-* Data: 13/05/2026
+*   para realizar o CRUD de Papel
+* Data: 29/05/2026
 * Autor: Matheus
 * Versão: 1.0
 *******************************************************************************************************/
 
 const configMessages = require("../modulo/configMessages.js")
 
-const nacionalidadeDAO = require('../../model/DAO/nacionalidade/nacionalidade.js')
+const papelDAO = require('../../model/DAO/papel/papel.js')
 
-const validarDados = async function (nacionalidade) {
+const validarDados = async function (papel) {
 
     let customMessage = JSON.parse(JSON.stringify(configMessages))
 
-    if (nacionalidade.nacionalidade == undefined || nacionalidade.nacionalidade == '' || nacionalidade.nacionalidade == null || nacionalidade.nacionalidade.length > 90 || !isNaN(nacionalidade.nacionalidade)) {
-        customMessage.ERROR_BAD_REQUEST.field = '[NACIONALIDADE] INVÁLIDA'
+    if (papel.nome_papel == undefined || papel.nome_papel == '' || papel.nome_papel == null || papel.nome_papel.length > 70 || !isNaN(papel.nome_papel)) {
+        customMessage.ERROR_BAD_REQUEST.field = '[SEXO] INVÁLIDO'
         return customMessage.ERROR_BAD_REQUEST
-    } else if (nacionalidade.sigla == undefined || nacionalidade.sigla == '' || nacionalidade.sigla == null || nacionalidade.sigla.length > 4 || !isNaN(nacionalidade.sigla)) {
+    } else if (papel.descricao == undefined || papel.descricao == '' || papel.descricao == null || !isNaN(papel.descricao)) {
         customMessage.ERROR_BAD_REQUEST.field = '[SIGLA] INVÁLIDA'
         return customMessage.ERROR_BAD_REQUEST
     } else {
@@ -25,19 +25,19 @@ const validarDados = async function (nacionalidade) {
     }
 }
 
-const tratarDados = function (nacionalidade) {
+const tratarDados = function (papel) {
 
-    nacionalidade.nacionalidade = nacionalidade.nacionalidade.replaceAll("'", "")
-    nacionalidade.sigla = nacionalidade.sigla.replaceAll("'", "")
+    papel.nome_papel = papel.nome_papel.replaceAll("'", "")
+    papel.descricao = papel.descricao.replaceAll("'", "")
 
-    return nacionalidade
+    return papel
 }
 
-const inserirNovoNacionalidade = async function (nacionalidade, contentType) {
+const inserirNovoPapel = async function (papel, contentType) {
 
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
-    let validar = await validarDados(nacionalidade)
+    let validar = await validarDados(papel)
 
     try {
         if (String(contentType).toLocaleUpperCase() == 'APPLICATION/JSON') {
@@ -45,15 +45,15 @@ const inserirNovoNacionalidade = async function (nacionalidade, contentType) {
             if (validar) {
                 return validar //400
             } else {
-                let result = await nacionalidadeDAO.insertNacionalidade(await tratarDados(nacionalidade))
+                let result = await papelDAO.insertPapel(await tratarDados(papel))
 
                 if (result) { //201
-                    nacionalidade.id = result
+                    papel.id = result
 
                     customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
                     customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_CREATED_ITEM.status_code
                     customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_CREATED_ITEM.message
-                    customMessages.DEFAULT_MESSAGE.response = nacionalidade
+                    customMessages.DEFAULT_MESSAGE.response = papel
 
                     return customMessages.DEFAULT_MESSAGE //201
                 } else { //erro 500 (Model)
@@ -68,12 +68,12 @@ const inserirNovoNacionalidade = async function (nacionalidade, contentType) {
     }
 }
 
-const listarNacionalidade = async function () {
+const listarPapel = async function () {
 
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        let result = await nacionalidadeDAO.selectAllNacionalidade()
+        let result = await papelDAO.selectAllPapel()
 
         if (result) {
 
@@ -81,7 +81,7 @@ const listarNacionalidade = async function () {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
                 customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
                 customMessages.DEFAULT_MESSAGE.response.count = result.length
-                customMessages.DEFAULT_MESSAGE.response.nacionalidade = result
+                customMessages.DEFAULT_MESSAGE.response.papel = result
 
                 return customMessages.DEFAULT_MESSAGE
             } else {
@@ -95,7 +95,7 @@ const listarNacionalidade = async function () {
     }
 }
 
-const buscarNacionalidadeId = async function (id) {
+const buscarPapelId = async function (id) {
 
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
@@ -106,14 +106,14 @@ const buscarNacionalidadeId = async function (id) {
             return customMessages.ERROR_BAD_REQUEST // 400
         } else {
 
-            let result = await nacionalidadeDAO.selectByIdNacionalidade(id)
+            let result = await papelDAO.selectByIdPapel(id)
 
             if (result) {
 
                 if (result.length > 0) {
                     customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
                     customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
-                    customMessages.DEFAULT_MESSAGE.response.nacionalidade = result
+                    customMessages.DEFAULT_MESSAGE.response.papel = result
 
                     return customMessages.DEFAULT_MESSAGE //200
                 } else {
@@ -129,7 +129,7 @@ const buscarNacionalidadeId = async function (id) {
     }
 }
 
-const atualizarNacionalidade = async function (nacionalidade, id, contentType) {
+const atualizarPapel = async function (papel, id, contentType) {
 
     let customMessage = JSON.parse(JSON.stringify(configMessages))
 
@@ -137,23 +137,23 @@ const atualizarNacionalidade = async function (nacionalidade, id, contentType) {
 
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
 
-            let resultBuscarNacionalidade = await buscarNacionalidadeId(id)
+            let resultBuscarPapel = await buscarPapelId(id)
 
-            if (resultBuscarNacionalidade.status) {
+            if (resultBuscarPapel.status) {
 
-                let validar = await validarDados(nacionalidade)
+                let validar = await validarDados(papel)
 
                 if (!validar) {
 
-                    nacionalidade.id = id
+                    papel.id = id
 
-                    let result = await nacionalidadeDAO.updateNacionalidade(await tratarDados(nacionalidade))
+                    let result = await papelDAO.updatePapel(await tratarDados(papel))
 
                     if (result) {
                         customMessage.DEFAULT_MESSAGE.status = customMessage.SUCCESS_UPDATED_ITEM.status
                         customMessage.DEFAULT_MESSAGE.status_code = customMessage.SUCCESS_UPDATED_ITEM.status_code
                         customMessage.DEFAULT_MESSAGE.message = customMessage.SUCCESS_UPDATED_ITEM.message
-                        customMessage.DEFAULT_MESSAGE.response = nacionalidade
+                        customMessage.DEFAULT_MESSAGE.response = papel
 
                         return customMessage.DEFAULT_MESSAGE //200 (Atualizado)
                     } else {
@@ -165,7 +165,7 @@ const atualizarNacionalidade = async function (nacionalidade, id, contentType) {
                 }
 
             } else {
-                return resultBuscarNacionalidade //400(id inválido) ou 404(não encontrado) ou 500
+                return resultBuscarPapel //400(id inválido) ou 404(não encontrado) ou 500
             }
 
         } else {
@@ -177,17 +177,17 @@ const atualizarNacionalidade = async function (nacionalidade, id, contentType) {
     }
 }
 
-const excluirNacionalidade = async function (id) {
+const excluirPapel = async function (id) {
 
     let customMessage = JSON.parse(JSON.stringify(configMessages))
 
     try {
 
-        let resultBuscarNacionalidade = await buscarNacionalidadeId(id)
+        let resultBuscarPapel = await buscarPapelId(id)
 
-        if (resultBuscarNacionalidade.status) {
+        if (resultBuscarPapel.status) {
 
-            let result = await nacionalidadeDAO.deleteNacionalidade(id)
+            let result = await papelDAO.deletePapel(id)
 
             if (result) {
                 customMessage.DEFAULT_MESSAGE.status = customMessage.SUCCESS_DELETE_ITEM.status
@@ -198,7 +198,7 @@ const excluirNacionalidade = async function (id) {
                 return customMessage.ERROR_INTERNAL_SERVER_MODEL //500 (Model)
             }
         } else {
-            return resultBuscarNacionalidade //400(id inválido) ou 404(não encontrado) ou 500
+            return resultBuscarPapel //400(id inválido) ou 404(não encontrado) ou 500
         }
     } catch (error) {
         return customMessage.ERROR_INTERNAL_SERVER_CONTROLLER
@@ -206,9 +206,9 @@ const excluirNacionalidade = async function (id) {
 }
 
 module.exports = {
-    inserirNovoNacionalidade,
-    listarNacionalidade,
-    buscarNacionalidadeId,
-    atualizarNacionalidade,
-    excluirNacionalidade
+    inserirNovoPapel,
+    listarPapel,
+    buscarPapelId,
+    atualizarPapel,
+    excluirPapel
 }
