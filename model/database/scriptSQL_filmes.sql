@@ -140,21 +140,17 @@ create table tbl_ator (
 	references tbl_sexo(id)
 );
 
-create table tbl_ator (
+select * from tbl_papel;
+
+create table tbl_papel (
 	id 		    	  int not null auto_increment primary key,
-    nome     		  varchar(100) not null,
-    biografia   	  text,
-    data_nascimento   date not null,
-    id_nacionalidade  int not null,
-    id_sexo 		  int not null,
+    nome_papel     	  varchar(70) not null,
+    descricao   	  text,
+    id_ator 		  int not null,
     
-	constraint FK_NACIONALIDADE_ATOR
-	foreign key (id_nacionalidade)
-	references tbl_nacionalidade(id),
-        
-	constraint FK_SEXO_ATOR
-	foreign key (id_sexo)
-	references tbl_sexo(id)
+	constraint FK_ATOR_PAPEL
+	foreign key (id_ator)
+	references tbl_ator(id)
 );
 
 delete from tbl_filme;

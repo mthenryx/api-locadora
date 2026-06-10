@@ -32,7 +32,7 @@ const controllerClassificacao    = require("./controller/classificacao/controlle
 const controllerSexo             = require("./controller/sexo/controller_sexo.js")
 const controllerNacionalidade    = require("./controller/nacionalidade/controller_nacionalidade.js")
 const controllerFotos            = require("./controller/fotos/controller_fotos.js")
-const controllerGenero           = require("./controller/genero/controller_genero.js")
+
 const controllerDiretor          = require("./controller/diretor/controller_diretor.js")
 const controllerAtor             = require("./controller/ator/controller_ator.js")
 const controllerPapel            = require("./controller/papel/controller_papel.js")
@@ -312,58 +312,9 @@ app.delete('/v1/senai/locadora/fotos/:id', async function (request, response) {
     response.json(result)
 })
 
-//ENDPOINTS GENERO
-app.post('/v1/senai/locadora/genero', bodyParserJSON, async function (request, response) {
-    let dados = request.body
-
-    let contentType = request.headers['content-type']
-
-    let result = await controllerGenero.inserirNovoGenero(dados, contentType)
-
-    response.status(result.status_code)
-    response.json(result)
-})
-
-app.get('/v1/senai/locadora/genero', async function (request, response) {
-
-    let result = await controllerGenero.listarGenero()
-
-    response.status(result.status_code)
-    response.json(result)
-})
-
-app.get('/v1/senai/locadora/genero/:id', async function (request, response) {
-    let id = request.params.id
-
-    let result = await controllerGenero.buscarGenero(id)
-
-    response.status(result.status_code)
-    response.json(result)
-})
-
-app.put('/v1/senai/locadora/genero/:id', bodyParserJSON, async function (request, response) {
-
-    let contentType = request.headers['content-type']
-
-    let id = request.params.id
-
-    let dados = request.body
-
-    let result = await controllerGenero.atualizarGenero(dados, id, contentType)
-
-    response.status(result.status_code)
-    response.json(result)
-})
-
-app.delete('/v1/senai/locadora/genero/:id', async function (request, response) {
-
-    let id = request.params.id
-
-    let result = await controllerGenero.excluirGenero(id)
-
-    response.status(result.status_code)
-    response.json(result)
-})
+//Import do arquivo de rotas do GENERO
+const generoRouter = require('./routes/genero.router.js')
+app.use('/v1/senai/locadora/genero', cors(), generoRouter)
 
 //ENDPOINTS DIRETOR
 app.post('/v1/senai/locadora/diretor', bodyParserJSON, async function (request, response) {
