@@ -1,29 +1,25 @@
-// Import do EXPRESS
 const express = require('express')
 const bodyParser = require('body-parser')
 
-//Permitindo a utilização do JSON no body das requisições
 const bodyParserJSON = bodyParser.json()
 
-//Criando um objeto de rota para os Endpoints de Genero
 const router = express.Router()
 
-//Import da Controller do Genero
-const controllerGenero = require('../controller/genero/controller_genero.js')
+const controllerClassificacao = require('../controller/classificacao/controller_classificacao.js')
 
-//                                  ENDPOINTS GENERO
 router.post('/', bodyParserJSON, async function (request, response) {
     let dados = request.body
+
     let contentType = request.headers['content-type']
-    
-    let result = await controllerGenero.inserirNovoGenero(dados, contentType)
+
+    let result = await controllerClassificacao.inserirNovaClassificacao(dados, contentType)
 
     response.status(result.status_code)
     response.json(result)
 })
 
 router.get('/', async function (request, response) {
-    let result = await controllerGenero.listarGenero()
+    let result = await controllerClassificacao.listarClassificacao()
 
     response.status(result.status_code)
     response.json(result)
@@ -32,18 +28,18 @@ router.get('/', async function (request, response) {
 router.get('/:id', async function (request, response) {
     let id = request.params.id
 
-    let result = await controllerGenero.buscarGenero(id)
+    let result = await controllerClassificacao.buscarClassificacao(id)
 
     response.status(result.status_code)
     response.json(result)
 })
 
 router.put('/:id', bodyParserJSON, async function (request, response) {
+    let contentType = request.headers['content-type']
     let id = request.params.id
     let dados = request.body
-    let contentType = request.headers['content-type']
 
-    let result = await controllerGenero.atualizarGenero(dados, id, contentType)
+    let result = await controllerClassificacao.atualizarClassificacao(dados, id, contentType)
 
     response.status(result.status_code)
     response.json(result)
@@ -51,12 +47,11 @@ router.put('/:id', bodyParserJSON, async function (request, response) {
 
 router.delete('/:id', async function (request, response) {
     let id = request.params.id
-
-    let result = await controllerGenero.excluirGenero(id)
+    
+    let result = await controllerClassificacao.excluirClassificacao(id)
 
     response.status(result.status_code)
     response.json(result)
 })
 
-//Export do objeto de rotas do genero
 module.exports = router

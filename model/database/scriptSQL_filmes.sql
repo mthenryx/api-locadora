@@ -4,175 +4,222 @@ create database db_filmes_20261_b;
 #Permite visualizar todos os databases existentes
 show databases;
 
-#Permite escolher o database a ser utilizado;
+#Permite escolher o database a ser utilizado
 use db_filmes_20261_b;
 
 #Permite visualizar todas as tabelas existentes dentro do database
 show tables;
 
-#Cria uma table no banco de dados 
+#Tabela Classificação
+create table tbl_classificacao (
+	id 				int not null auto_increment primary key,
+    classificacao 	varchar(6) not null
+);
+
+#Criar tabela
 create table tbl_filme (
 	id 					int not null auto_increment primary key,
-    nome 				varchar(80) not null, 
+    nome 				varchar(80) not null,
     sinopse 			text not null,
     capa 				varchar(255) not null,
     data_lancamento 	date not null,
     duracao 			time not null,
     valor 				decimal(5,2) default 0,
-    avaliacao 			decimal(3,2) default null
+    avaliacao 			decimal(3,2) default null,
+    id_classificacao	int not null,
+    
+    #Relação entre Classificação e Filme
+    constraint FK_CLASSIFICACAO_FILME
+    foreign key (id_classificacao)
+    references tbl_classificacao(id)
 );
 
-#Apaga a table do banco de dados
-#drop table tbl_filme;
-
-#Apaga um database
-#drop database db_filmes_20261_b;
-
-insert into tbl_filme (
-    nome, 
-    sinopse,
-    capa,
-    data_lancamento,
-    duracao,
-    valor,
-    avaliacao
-) values (
-	'Super Mario Galaxy: O Filme',
-    'O bigodudo encanador italiano e seus aliados embarcam numa aventura galáctica 
-    repleta de ação e momentos emocionantes depois de salvar o Reino dos Cogumelos.',
-    'https://br.web.img3.acsta.net/c_310_420/img/5b/ea/5bea1aeac3323aeaaf82449a34fafbbf.jpg',
-    '2026-04-02',
-    '01:39:00',
-    '50.60',
-    '3'
-);
-
-select * from tbl_filme_genero order by id desc;
-
-select * from tbl_filme where id = 24;
-
-update tbl_filme set 
-	nome = '',
-    sinopse = '',
-    capa = '',
-    data_lancamento = '',
-    duracao = '',
-    valor = '',
-    avaliacao = ''
-where id = 65;
-
-delete from tbl_filme where id > 0;
-
-create table tbl_classificacao (
-	id 			   int not null auto_increment primary key,
-    classificacao  varchar(6) not null
-);
-
+#Tabela Sexo
 create table tbl_sexo (
 	id 		int not null auto_increment primary key,
-    sexo	varchar(20) not null,
-    sigla	varchar(24) not null
+    sexo 	varchar(20) not null,
+    sigla 	varchar(3) not null
 );
 
+#Tabela Nacionalidade
 create table tbl_nacionalidade (
 	id 				int not null auto_increment primary key,
-    nacionalidade   varchar(90) not null,
+    nacionalidade 	varchar(90) not null,
     sigla 			varchar(4) not null
 );
 
+#Tabela Genero
 create table tbl_genero (
 	id 		int not null auto_increment primary key,
-    genero	varchar(20) not null
+    genero 	varchar(30) not null
 );
 
-create table tbl_filme_genero (
+#Tabela Intermediaria Filme e Genero
+create table tbl_genero_filme (
 	id 			int not null auto_increment primary key,
     id_filme 	int not null,
     id_genero 	int not null,
     
-    constraint FK_FILME_FILME_GENERO
+    constraint FK_FILME_GENEROFILME
     foreign key (id_filme)
     references tbl_filme(id),
     
-    constraint FK_GENERO_FILME_GENERO
+    constraint FK_GENERO_GENEROFILME
     foreign key (id_genero)
     references tbl_genero(id)
 );
 
-create table tbl_fotos (
-	id 		 int not null auto_increment primary key,
-    foto_url varchar(255) not null
+#Tabela Atividade
+create table tbl_atividade (
+	id 			int not null auto_increment primary key,
+    atividade 	varchar(40) not null
 );
 
+#Tabela Foto
+create table tbl_foto (
+	id 			int not null auto_increment primary key,
+    foto_url 	varchar(255) not null
+);
+
+#Tabela Diretor
 create table tbl_diretor (
-	id 		    	  int not null auto_increment primary key,
-    nome     		  varchar(100) not null,
-    biografia   	  text,
-    data_nascimento   date not null,
-    id_nacionalidade  int not null,
-    id_sexo 		  int not null,
+	id 							int not null auto_increment primary key,
+    nome 						varchar(100) not null,
+    data_nascimento 			date not null,
+    biografia 					text,
+    id_sexo_diretor 			int not null,
+    id_nacionalidade_diretor 	int not null,
     
-	constraint FK_NACIONALIDADE_DIRETOR
-	foreign key (id_nacionalidade)
-	references tbl_nacionalidade(id),
-        
-	constraint FK_SEXO_DIRETOR
-	foreign key (id_sexo)
-	references tbl_sexo(id)
+    #Relação entre a Tabela de Sexo e Diretor
+    constraint FK_SEXO_DIRETOR
+    foreign key (id_sexo_diretor)
+    references tbl_sexo(id),
+    
+    #Relação entre a Tabela Nacionalidade e Diretor
+    constraint FK_NACIONALIDADE_DIRETOR
+    foreign key (id_nacionalidade_diretor)
+    references tbl_nacionalidade(id)
 );
 
-select * from tbl_ator;
-
+#Tabela Ator
 create table tbl_ator (
-	id 		    	  int not null auto_increment primary key,
-    nome     		  varchar(100) not null,
-    biografia   	  text,
-    data_nascimento   date not null,
-    id_nacionalidade  int not null,
-    id_sexo 		  int not null,
+	id 							int not null auto_increment primary key,
+    nome 						varchar(100) not null,
+    data_nascimento 			date not null,
+    biografia 					text,
+    id_sexo_ator 				int not null,
+    id_nacionalidade_ator 		int not null,
     
-	constraint FK_NACIONALIDADE_ATOR
-	foreign key (id_nacionalidade)
-	references tbl_nacionalidade(id),
-        
-	constraint FK_SEXO_ATOR
-	foreign key (id_sexo)
-	references tbl_sexo(id)
+    #Relação entre a Tabela de Sexo e Ator
+    constraint FK_SEXO_ATOR
+    foreign key (id_sexo_ator)
+    references tbl_sexo(id),
+    
+    #Relação entre a Tabela Nacionalidade e Ator
+    constraint FK_NACIONALIDADE_ATOR
+    foreign key (id_nacionalidade_ator)
+    references tbl_nacionalidade(id)
 );
 
-select * from tbl_papel;
-
-create table tbl_papel (
-	id 		    	  int not null auto_increment primary key,
-    nome_papel     	  varchar(70) not null,
-    descricao   	  text,
-    id_ator 		  int not null,
+#Tabela Foto Ator
+create table tbl_foto_ator (
+	id 		int not null auto_increment primary key,
+    id_foto int not null,
+    id_ator int not null,
     
-	constraint FK_ATOR_PAPEL
-	foreign key (id_ator)
-	references tbl_ator(id)
+    #Relação entre Foto e FotoAtor
+    constraint FK_FOTO_FOTOATOR
+    foreign key (id_foto)
+    references tbl_foto(id),
+    
+    #Relação entre Ator e FotoAtor
+    constraint FK_ATOR_FOTOATOR
+    foreign key (id_ator)
+    references tbl_ator(id)
 );
 
-delete from tbl_filme;
-
-alter table tbl_ator
-	add	constraint FK_NACIONALIDADE_DIRETOR
-	foreign key (id_nacionalidade)
-	references tbl_nacionalidade(id),
-        
-	add constraint FK_SEXO_DIRETOR
-	foreign key (id_sexo)
-	references tbl_sexo(id);
-        
-desc tbl_filme;
-        
-update tbl_classificacao set 
-	classificacao = 'teste'
-where id = 2;
-
-desc tbl_classificacao;
-
-select * from tbl_filme order by id desc;
-
-
+#Tabela Foto Diretor
+create table tbl_foto_diretor (
+	id 			int not null auto_increment primary key,
+    id_foto 	int not null,
+    id_diretor 	int not null,
     
+    #Relação entre Foto e FotoDiretor
+    constraint FK_FOTO_FOTODIRETOR
+    foreign key (id_foto)
+    references tbl_foto(id),
+    
+    #Relação entre Diretor e FotoDiretor
+    constraint FK_DIRETOR_FOTODIRETOR
+    foreign key (id_diretor)
+    references tbl_diretor(id)
+);
+
+#Tabela Atividade Ator
+create table tbl_atividade_ator (
+	id 				int not null auto_increment primary key,
+    id_atividade 	int not null,
+    id_ator 		int not null,
+    
+    #Relação entre Atividade e intermediária
+    constraint FK_ATIVIDADE_ATIVIDADEATOR
+    foreign key (id_atividade)
+    references tbl_atividade(id),
+    
+    #Relação entre Ator e intermediária
+    constraint FK_ATOR_ATIVIDADEATOR
+    foreign key (id_ator)
+    references tbl_ator(id)
+);
+
+#Tabela Atividade Diretor
+create table tbl_atividade_diretor (
+	id 				int not null auto_increment primary key,
+    id_atividade 	int not null,
+    id_diretor 		int not null,
+    
+    #Relação entre Atividade e intermediária
+    constraint FK_ATIVIDADE_ATIVIDADEDIRETOR
+    foreign key (id_atividade)
+    references tbl_atividade(id),
+    
+    #Relação entre Diretor e intermediária
+    constraint FK_DIRETOR_ATIVIDADEDIRETOR
+    foreign key (id_diretor)
+    references tbl_diretor(id)
+);
+
+#Tabela Filme Ator
+create table tbl_filme_ator (
+	id 			int not null auto_increment primary key,
+    id_filme 	int not null,
+    id_ator 	int not null,
+    
+    #Relação entre Filme e intermediária
+    constraint FK_FILME_FILMEATOR
+    foreign key (id_filme)
+    references tbl_filme(id),
+    
+    #Releção entre Ator e intermediária
+    constraint FK_ATOR_FILMEATOR
+    foreign key (id_ator)
+    references tbl_ator(id)
+);
+
+#Tabela Filme Diretor
+create table tbl_filme_diretor (
+	id 			int not null auto_increment primary key,
+    id_filme 	int not null,
+    id_diretor 	int not null,
+    
+    #Relação entre Filme e intermediária
+    constraint FK_FILME_FILMEDIRETOR
+    foreign key (id_filme)
+    references tbl_filme(id),
+    
+    #Releção entre Diretor e intermediária
+    constraint FK_DIRETOR_FILMEDIRETOR
+    foreign key (id_diretor)
+    references tbl_diretor(id)
+);
+

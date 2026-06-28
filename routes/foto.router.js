@@ -8,22 +8,21 @@ const bodyParserJSON = bodyParser.json()
 //Criando um objeto de rota para os Endpoints de Genero
 const router = express.Router()
 
-//Import da Controller do Genero
-const controllerGenero = require('../controller/genero/controller_genero.js')
+const controllerFoto = require('../controller/foto/controller_foto.js')
 
-//                                  ENDPOINTS GENERO
+//                                 ENDPOINTS FOTO
 router.post('/', bodyParserJSON, async function (request, response) {
     let dados = request.body
     let contentType = request.headers['content-type']
     
-    let result = await controllerGenero.inserirNovoGenero(dados, contentType)
+    let result = await controllerFoto.inserirNovaFoto(dados, contentType)
 
     response.status(result.status_code)
     response.json(result)
 })
 
 router.get('/', async function (request, response) {
-    let result = await controllerGenero.listarGenero()
+    let result = await controllerFoto.listarFoto()
 
     response.status(result.status_code)
     response.json(result)
@@ -32,7 +31,7 @@ router.get('/', async function (request, response) {
 router.get('/:id', async function (request, response) {
     let id = request.params.id
 
-    let result = await controllerGenero.buscarGenero(id)
+    let result = await controllerFoto.buscarFoto(id)
 
     response.status(result.status_code)
     response.json(result)
@@ -43,7 +42,7 @@ router.put('/:id', bodyParserJSON, async function (request, response) {
     let dados = request.body
     let contentType = request.headers['content-type']
 
-    let result = await controllerGenero.atualizarGenero(dados, id, contentType)
+    let result = await controllerFoto.atualizarFoto(dados, id, contentType)
 
     response.status(result.status_code)
     response.json(result)
@@ -52,11 +51,10 @@ router.put('/:id', bodyParserJSON, async function (request, response) {
 router.delete('/:id', async function (request, response) {
     let id = request.params.id
 
-    let result = await controllerGenero.excluirGenero(id)
+    let result = await controllerFoto.excluirFoto(id)
 
     response.status(result.status_code)
     response.json(result)
 })
 
-//Export do objeto de rotas do genero
 module.exports = router

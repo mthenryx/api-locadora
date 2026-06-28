@@ -1,13 +1,15 @@
 const configMessages = require('../modulo/configMessages.js')
 
-const nacionalidadeDAO = require('../../model/DAO/nacionalidade/nacionalidade.js')
+const fotoDAO = require('../../model/DAO/foto/foto.js')
 
-const validarDados = async function (nacionalidade) {
+const controllerFotoAtor    = require('../ator/controller_foto_ator.js')
+const controllerFotoDiretor = require('../diretor/controller_foto_diretor.js')
+
+const validarDados = async function (foto) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
-    if (nacionalidade.nacionalidade == undefined || nacionalidade.nacionalidade == '' || nacionalidade.nacionalidade == null ||  nacionalidade.nacionalidade.length > 90 ||
-            nacionalidade.sigla == undefined || nacionalidade.sigla == '' || nacionalidade.sigla == null || nacionalidade.sigla.length > 4) {
-        customMessages.ERROR_BAD_REQUEST.field = '[NACIONALIDADE] INVÁLIDO'
+    if (foto.foto_url == undefined || foto.foto_url == '' || foto.foto_url == null ||  foto.foto_url.length > 255) {
+        customMessages.ERROR_BAD_REQUEST.field = '[FOTO] INVÁLIDa'
     } else {
         return false
     }
@@ -15,31 +17,30 @@ const validarDados = async function (nacionalidade) {
     return customMessages.ERROR_BAD_REQUEST
 }
 
-const tratarDados = async function (nacionalidade) {
-    nacionalidade.nacionalidade = nacionalidade.nacionalidade.replaceAll("'", "")
-    nacionalidade.sigla = nacionalidade.sigla.replaceAll("'", "")
+const tratarDados = async function (foto) {
+    foto.foto_url = foto.foto_url.replaceAll("'", "")
 
-    return nacionalidade
+    return foto
 }
 
-const inserirNovaNacionalidade = async function (nacionalidade, contentType) {
+const inserirNovaFoto = async function (foto, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let validacao = await validarDados(nacionalidade)
+            let validacao = await validarDados(foto)
             if (validacao)
-                return validacao //400
-            else { //200
-                let result = await nacionalidadeDAO.insertNacionalidade(await tratarDados(nacionalidade))
+                return validacao
+            else {
+                let result = await fotoDAO.insertFoto(await tratarDados(foto))
 
                 if (result) {
-                    nacionalidade.id = result
+                    foto.id = result
 
                     customMessages.DEFAULT_MESSAGE.status       = customMessages.SUCCESS_CREATED_ITEM.status
                     customMessages.DEFAULT_MESSAGE.status_code  = customMessages.SUCCESS_CREATED_ITEM.status_code
                     customMessages.DEFAULT_MESSAGE.message      = customMessages.SUCCESS_CREATED_ITEM.message
-                    customMessages.DEFAULT_MESSAGE.response     = nacionalidade
+                    customMessages.DEFAULT_MESSAGE.response     = foto
 
                     return customMessages.DEFAULT_MESSAGE
                 } else {
@@ -55,27 +56,27 @@ const inserirNovaNacionalidade = async function (nacionalidade, contentType) {
 
 }
 
-const atualizarNacionalidade = async function (nacionalidade, id, contentType) {
+const atualizarFoto = async function (foto, id, contentType) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
 
-            let resultBuscarNacionalidade = await buscarNacionalidade(id)
+            let resultBuscarFoto = await buscarFoto(id)
 
-            if (resultBuscarNacionalidade.status) {
-                let validar = await validarDados(nacionalidade)
+            if (resultBuscarFoto.status) {
+                let validar = await validarDados(foto)
 
                 if (!validar) {
-                    nacionalidade.id = Number(id)
+                    foto.id = Number(id)
 
-                    let result = await nacionalidadeDAO.updateNacionalidade(await tratarDados(nacionalidade))
+                    let result = await fotoDAO.updateFoto(await tratarDados(foto))
 
                     if (result) {
                         customMessages.DEFAULT_MESSAGE.status       = customMessages.SUCCESS_UPDATE_ITEM.status
                         customMessages.DEFAULT_MESSAGE.status_code  = customMessages.SUCCESS_UPDATE_ITEM.status_code
                         customMessages.DEFAULT_MESSAGE.message      = customMessages.SUCCESS_UPDATE_ITEM.message
-                        customMessages.DEFAULT_MESSAGE.response     = nacionalidade
+                        customMessages.DEFAULT_MESSAGE.response     = foto
 
                         return customMessages.DEFAULT_MESSAGE //200 (Atualizado)
                     } else {
@@ -85,7 +86,7 @@ const atualizarNacionalidade = async function (nacionalidade, id, contentType) {
                     return validar
                 }
             } else {
-                return resultBuscarNacionalidade
+                return resultBuscarFoto
             }
         } else {
             return customMessages.ERROR_CONTENT_TYPE
@@ -95,18 +96,30 @@ const atualizarNacionalidade = async function (nacionalidade, id, contentType) {
     }
 }
 
-const listarNacionalidade = async function () {
+const listarFoto = async function () {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        let result = await nacionalidadeDAO.selectAllNacionalidade()
+        let result = await fotoDAO.selectAllFoto()
 
         if (result) {
             if (result.length > 0) {
-                customMessages.DEFAULT_MESSAGE.status                 = customMessages.SUCCESS_RESPONSE.status
-                customMessages.DEFAULT_MESSAGE.status_code            = customMessages.SUCCESS_RESPONSE.status_code
-                customMessages.DEFAULT_MESSAGE.response.count         = result.length
-                customMessages.DEFAULT_MESSAGE.response.nacionalidade = result
+                for (let foto of result) {
+                    let resultFotoAtor = await controllerFotoAtor.buscarAtoresIdFoto(foto.id)
+
+                    if (resultFotoAtor.status)
+                        foto.ator = resultFotoAtor.response.foto_ator
+
+                    let resultFotoDiretor = await controllerFotoDiretor.buscarDiretoresIdFoto(foto.id)
+
+                    if (resultFotoDiretor.status)
+                        foto.diretor = resultFotoDiretor.response.foto_diretor
+                }
+
+                customMessages.DEFAULT_MESSAGE.status               = customMessages.SUCCESS_RESPONSE.status
+                customMessages.DEFAULT_MESSAGE.status_code          = customMessages.SUCCESS_RESPONSE.status_code
+                customMessages.DEFAULT_MESSAGE.response.count       = result.length
+                customMessages.DEFAULT_MESSAGE.response.foto_url    = result
 
                 return customMessages.DEFAULT_MESSAGE
             } else {
@@ -120,21 +133,33 @@ const listarNacionalidade = async function () {
     }
 }
 
-const buscarNacionalidade = async function (id) {
+const buscarFoto = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
         if (id == undefined || String(id).replaceAll(' ', '') == '' || id == null ||  isNaN(id) || id <= 0) {
             customMessages.ERROR_BAD_REQUEST.field = '[ID] INVÁLIDO'
-            return customMessages.ERROR_BAD_REQUEST //400
+            return customMessages.ERROR_BAD_REQUEST
         } else {
-            let result = await nacionalidadeDAO.selectByIdNacionalidade(id)
+            let result = await fotoDAO.selectByIdFoto(id)
 
             if (result) {
                 if (result.length > 0) {
-                    customMessages.DEFAULT_MESSAGE.status                 = customMessages.SUCCESS_RESPONSE.status
-                    customMessages.DEFAULT_MESSAGE.status_code            = customMessages.SUCCESS_RESPONSE.status_code
-                    customMessages.DEFAULT_MESSAGE.response.nacionalidade = result
+                    for (let foto of result) {
+                    let resultFotoAtor = await controllerFotoAtor.buscarAtoresIdFoto(foto.id)
+
+                    if (resultFotoAtor.status)
+                        foto.ator = resultFotoAtor.response.foto_ator
+
+                    let resultFotoDiretor = await controllerFotoDiretor.buscarDiretoresIdFoto(foto.id)
+
+                    if (resultFotoDiretor.status)
+                        foto.diretor = resultFotoDiretor.response.foto_diretor
+                }
+
+                    customMessages.DEFAULT_MESSAGE.status               = customMessages.SUCCESS_RESPONSE.status
+                    customMessages.DEFAULT_MESSAGE.status_code          = customMessages.SUCCESS_RESPONSE.status_code
+                    customMessages.DEFAULT_MESSAGE.response.foto_url    = result
 
                     return customMessages.DEFAULT_MESSAGE
                 } else {
@@ -149,14 +174,14 @@ const buscarNacionalidade = async function (id) {
     }
 }
 
-const excluirNacionalidade = async function (id) {
+const excluirFoto = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        let resultBuscarNacionalidade = await buscarNacionalidade(id)
+        let resultBuscarFoto = await buscarFoto(id)
 
-        if (resultBuscarNacionalidade.status) {
-            let result = await nacionalidadeDAO.deleteNacionalidade(id)
+        if (resultBuscarFoto.status) {
+            let result = await fotoDAO.deleteFoto(id)
 
             if (result) {
                 return customMessages.SUCCESS_DELETE_ITEM
@@ -164,7 +189,7 @@ const excluirNacionalidade = async function (id) {
                 return customMessages.ERROR_INTERNAL_SERVER_MODEL
             }
         } else {
-            return resultBuscarNacionalidade
+            return resultBuscarFoto
         }
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER //500 (controller)
@@ -172,9 +197,9 @@ const excluirNacionalidade = async function (id) {
 }
 
 module.exports = {
-    inserirNovaNacionalidade,
-    listarNacionalidade,
-    buscarNacionalidade,
-    atualizarNacionalidade,
-    excluirNacionalidade
+    inserirNovaFoto,
+    listarFoto,
+    buscarFoto,
+    atualizarFoto,
+    excluirFoto
 }

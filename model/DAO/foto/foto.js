@@ -1,33 +1,23 @@
-/****************************************************************************************************** 
-* Objetivo: Arquivo responsável pelo CRUD de dados das fotos no banco de dados 
-* MySQL
-* Data: 15/05/2026
-* Autor: Matheus
-* Versão: 1.0
-*******************************************************************************************************/
-
 const knex = require('knex')
 
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
+const knexDataBaseConfig = require('../../database/database_config/knexConfig.js')
 
 const knexConection = knex(knexDataBaseConfig.development)
 
 const insertFoto = async function (foto) {
-
     try {
-        let sql = `insert into tbl_fotos (
-            foto_url 
+        let sql = `insert into tbl_foto (
+            foto_url
         ) values (
-            '${foto.url}'
+            '${foto.foto_url}'
         );`
 
         let result = await knexConection.raw(sql)
 
-        if (result) {
+        if (result)
             return result[0].insertId
-        } else {
+        else
             return false
-        }
     } catch (error) {
         return false
     }
@@ -35,18 +25,16 @@ const insertFoto = async function (foto) {
 
 const updateFoto = async function (foto) {
     try {
-        let sql = `update tbl_fotos set 
-                        foto_url = '${foto.url}'
+        let sql = `update tbl_foto set
+                        foto_url = '${foto.foto_url}'
                     where id = ${foto.id};`
 
         let result = await knexConection.raw(sql)
 
-        if (result) {
+        if (result)
             return true
-        } else {
+        else
             return false
-        }
-
     } catch (error) {
         return false
     }
@@ -54,7 +42,7 @@ const updateFoto = async function (foto) {
 
 const selectAllFoto = async function () {
     try {
-        let sql = 'select * from tbl_fotos order by id desc'
+        let sql = 'select * from tbl_foto order by id desc'
 
         let result = await knexConection.raw(sql)
 
@@ -64,13 +52,13 @@ const selectAllFoto = async function () {
             return false
 
     } catch (error) {
-        return false
+
     }
 }
 
 const selectByIdFoto = async function (id) {
     try {
-        let sql = `select * from tbl_fotos where id = ${id};`
+        let sql = `select * from tbl_foto where id = ${id}`
 
         let result = await knexConection.raw(sql)
 
@@ -79,7 +67,6 @@ const selectByIdFoto = async function (id) {
         } else {
             return false
         }
-
     } catch (error) {
         return false
     }
@@ -87,15 +74,14 @@ const selectByIdFoto = async function (id) {
 
 const deleteFoto = async function (id) {
     try {
-        let sql = `delete from tbl_fotos where id = ${id};`
+        let sql = `delete from tbl_foto where id = ${id};`
 
         let result = await knexConection.raw(sql)
 
-        if (result) {
+        if (result)
             return true
-        } else {
+        else
             return false
-        }
     } catch (error) {
         return false
     }

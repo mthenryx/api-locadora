@@ -1,15 +1,16 @@
-/****************************************************************************************************** 
-* Objetivo: Arquivo responsável pelo CRUD de dados do Filme no banco de dados 
-* MySQL
-* Data: 15/04/2026
-* Autor: Matheus
-* Versão: 1.0
-*******************************************************************************************************/
-//Import da biblioteca para manipular dados no Banco de dados MySQL
+/*************************************************************************************
+ * Objetivo: Arquivo responsável pelo CRUD de dados do Filme no banco de dados
+ *          MySQL
+ * Data: 15/04/2026
+ * Autor: Matheus Henry dos Santos
+ * Versão: 1.0
+**************************************************************************************/
+
+//Import da biblioteca para manipular dados no Banco de Dados MySQL
 const knex = require('knex')
 
-//Import do arquivo de configurações para acesso ao banco
-const knexDataBaseConfig = require('../../database_config/knexConfig.js')
+//Import do arquivo de configuração para acesso ao banco de dados
+const knexDataBaseConfig = require('../../database/database_config/knexConfig.js')
 
 //Criar a conexão com o banco de dados MySQL conforme o arquivo de configuração
 const knexConection = knex(knexDataBaseConfig.development)
@@ -18,60 +19,58 @@ const knexConection = knex(knexDataBaseConfig.development)
 const insertFilme = async function (filme) {
     try {
         let sql = `insert into tbl_filme (
-        nome, 
-        sinopse,
-        capa,
-        data_lancamento,
-        duracao,
-        valor,
-        avaliacao,
-        id_classificacao
+            nome,
+            sinopse,
+            capa,
+            data_lancamento,
+            duracao,
+            valor,
+            avaliacao,
+            id_classificacao
         ) values (
-    	    '${filme.nome}',
+            '${filme.nome}',
             '${filme.sinopse}',
             '${filme.capa}',
             '${filme.data_lancamento}',
             '${filme.duracao}',
             '${filme.valor}',
-           if('${filme.avaliacao}' = '', null, '${filme.avaliacao}'),
-            ${filme.id_classificacao}
+            if('${filme.avaliacao}' = '', null, '${filme.avaliacao}'),
+            '${filme.id_classificacao}'
         );`
 
-        //Encaminha para o BD o scriptSQL
+        //Encaminha para o banco de dados o scriptSQL
         let result = await knexConection.raw(sql)
-
-        if (result) {
-            return result[0].insertId //Devolve o id do filme inserido
-        } else {
+        
+        if (result)
+            return result[0].insertId
+        else
             return false
-        }
     } catch (error) {
         return false
     }
+
 }
 
-//Função para atuaizar um filme existente no banco de dados
+//Função para atualizar um filme existente no banco de dados
 const updateFilme = async function (filme) {
     try {
-        let sql = `update tbl_filme set 
-                        nome             = '${filme.nome}',
-                        sinopse          = '${filme.sinopse}',
-                        capa             = '${filme.capa}',
-                        data_lancamento  = '${filme.data_lancamento}',
-                        duracao          = '${filme.duracao}',
-                        valor            = '${filme.valor}',
-                        avaliacao        = if('${filme.avaliacao}' = '', null, '${filme.avaliacao}'),
-                        id_classificacao = '${filme.id_classificacao}'
+        let sql = `update tbl_filme set
+	                    nome                = '${filme.nome}',
+                        sinopse             = '${filme.sinopse}',
+                        capa                = '${filme.capa}',
+                        data_lancamento     = '${filme.data_lancamento}',
+                        duracao             = '${filme.duracao}',
+                        valor               = '${filme.valor}',
+                        avaliacao           = if('${filme.avaliacao}' = '', null, '${filme.avaliacao}'),
+                        id_classificacao    = '${filme.id_classificacao}'
                     where id = ${filme.id};`
 
         let result = await knexConection.raw(sql)
 
-        if (result) {
+        if (result)
             return true
-        } else {
+        else
             return false
-        }
-
     } catch (error) {
         return false
     }
@@ -80,29 +79,27 @@ const updateFilme = async function (filme) {
 //Função para retornar todos os dados de filme do banco de dados
 const selectAllFilme = async function () {
     try {
-        //Script SQL para listar todos os filmes 
+        //Script SQL para listar todos os filmes
         let sql = 'select * from tbl_filme order by id desc'
 
-        //Executa no BD o filme e guarda o retorno do BD,
-        //Pode ser um ERRO (false) Ou um ARRAY com os dados 
+        //Executa no BD o script e guarda o retorno do BD, pode ser um ERRO (false) ou um Array com os dados
         let result = await knexConection.raw(sql)
 
-        //Validação para verificar se o retorno do BD é um 
-        //ARRAY ou um BOLLEAN (false)
+        //Validação para verificar se o retorno do BD é um Array ou um Boolean (false)
         if (Array.isArray(result))
             return result[0] //Retorna somente o indice com a lista de filmes
         else
             return false
 
     } catch (error) {
-        return false
+
     }
 }
 
 //Função para retornar um filme filtrando pelo ID
 const selectByIdFilme = async function (id) {
     try {
-        let sql = `select * from tbl_filme where id = ${id};`
+        let sql = `select * from tbl_filme where id = ${id}`
 
         let result = await knexConection.raw(sql)
 
@@ -111,24 +108,22 @@ const selectByIdFilme = async function (id) {
         } else {
             return false
         }
-
     } catch (error) {
         return false
     }
 }
 
-//Função para escluir um filme filtrando pelo ID
+//Função para excluir um filme filtrando pelo ID
 const deleteFilme = async function (id) {
     try {
         let sql = `delete from tbl_filme where id = ${id};`
 
         let result = await knexConection.raw(sql)
 
-        if (result) {
+        if (result)
             return true
-        } else {
+        else
             return false
-        }
     } catch (error) {
         return false
     }

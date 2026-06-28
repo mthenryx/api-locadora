@@ -1,64 +1,81 @@
-/****************************************************************************************************** 
-* Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados
-*   para realizar o CRUD de diretor
-* Data: 20/05/2026
-* Autor: Matheus
-* Versão: 1.0
-*******************************************************************************************************/
-
-const configMessages = require("../modulo/configMessages.js")
+const configMessages = require('../modulo/configMessages.js')
 
 const diretorDAO = require('../../model/DAO/diretor/diretor.js')
 
-const validarDados = function (diretor) {
+const controllerSexo = require('../sexo/controller_sexo.js')
+const controllerNacionalidade = require('../nacionalidade/controller_nacionalidade.js')
+const controllerFotoDiretor = require('./controller_foto_diretor.js')
+const controllerAtividadeDiretor = require('./controller_atividade_diretor.js')
+const controllerFilmeDiretor = require('../filme/controller_filme_diretor.js')
 
-    let customMessage = JSON.parse(JSON.stringify(configMessages))
+const validarDados = async function (diretor) {
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
 
-    if (diretor.nome == undefined || diretor.nome == '' || diretor.nome == null || diretor.nome.length > 100 || !isNaN(diretor.nome)) {
-        customMessage.ERROR_BAD_REQUEST.field = '[NOME] INVÁLIDA'
-        return customMessage.ERROR_BAD_REQUEST
-    } else if (diretor.biografia == undefined || diretor.biografia == null || !isNaN(diretor.biografia)) {
-        customMessage.ERROR_BAD_REQUEST.field = '[BIOGRAFIA] INVÁLIDA'
-        return customMessage.ERROR_BAD_REQUEST
+    if (diretor.nome == undefined || diretor.nome == '' || diretor.nome == null || diretor.nome.length > 100) {
+        customMessages.ERROR_BAD_REQUEST.field = '[NOME] INVÁLIDO'
     } else if (diretor.data_nascimento == undefined || diretor.data_nascimento == '' || diretor.data_nascimento == null || diretor.data_nascimento.length != 10) {
-        customMessage.ERROR_BAD_REQUEST.field = '[DATA_NASCIMENTO] INVÁLIDA'
-        return customMessage.ERROR_BAD_REQUEST
-    } else if (diretor.id_nacionalidade == undefined || diretor.id_nacionalidade == '' || diretor.id_nacionalidade == null || isNaN(diretor.id_nacionalidade)) {
-        customMessage.ERROR_BAD_REQUEST.field = '[ID_NACIONALIDADE] INVÁLIDA'
-        return customMessage.ERROR_BAD_REQUEST
-    } else if (diretor.id_sexo == undefined || diretor.id_sexo == '' || diretor.id_sexo == null || isNaN(diretor.id_sexo)) {
-        customMessage.ERROR_BAD_REQUEST.field = '[ID_SEXO] INVÁLIDA'
-        return customMessage.ERROR_BAD_REQUEST
+        customMessages.ERROR_BAD_REQUEST.field = '[DATA DE NASCIMENTO] INVÁLIDO'
+    } else if (diretor.biografia == undefined) {
+        customMessages.ERROR_BAD_REQUEST.field = '[BIOGRAFIA] INVÁLIDO'
+    } else if (diretor.id_sexo_diretor == undefined || diretor.id_sexo_diretor == '' || diretor.id_sexo_diretor == null || diretor.id_sexo_diretor < 1 || isNaN(diretor.id_sexo_diretor)) {
+        customMessages.ERROR_BAD_REQUEST.field = '[ID DE SEXO] INVÁLIDO'
+    } else if (diretor.id_nacionalidade_diretor == undefined || diretor.id_nacionalidade_diretor == '' || diretor.id_nacionalidade_diretor == null || diretor.id_nacionalidade_diretor < 1 || isNaN(diretor.id_nacionalidade_diretor)) {
+        customMessages.ERROR_BAD_REQUEST.field = '[ID DE NACIONALIDADE] INVÁLIDO'
     } else {
         return false
     }
+
+    return customMessages.ERROR_BAD_REQUEST
 }
 
-const tratarDados = function (diretor) {
-
+const tratarDados = async function (diretor) {
     diretor.nome = diretor.nome.replaceAll("'", "")
-    diretor.biografia = diretor.biografia.replaceAll("'", "")
     diretor.data_nascimento = diretor.data_nascimento.replaceAll("'", "")
+    diretor.biografia = diretor.biografia.replaceAll("'", "")
 
     return diretor
 }
 
 const inserirNovoDiretor = async function (diretor, contentType) {
-
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
-    let validar = await validarDados(diretor)
-
     try {
-        if (String(contentType).toLocaleUpperCase() == 'APPLICATION/JSON') {
+        if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
+            let validacao = await validarDados(diretor)
 
-            if (validar) {
-                return validar //400
-            } else {
+            if (validacao)
+                return validacao //400
+            else { //200
                 let result = await diretorDAO.insertDiretor(await tratarDados(diretor))
 
-                if (result) { //201
+                if (result) {
                     diretor.id = result
+
+                    for (let itemDiretor of diretor.foto) {
+                        let fotoDiretor = {
+                            "id_diretor": diretor.id,
+                            "id_foto": itemDiretor.id
+                        }
+
+                        let resultFotoDiretor = await controllerFotoDiretor.inserirNovaFotoDiretor(fotoDiretor)
+
+                        if (!resultFotoDiretor.status) {
+                            return customMessages.SUCCESS_CREATED_ITEM_WARNING
+                        }
+                    }
+
+                    for (let itemDiretor of diretor.atividade) {
+                        let atividadeDiretor = {
+                            "id_diretor": diretor.id,
+                            "id_atividade": itemDiretor.id
+                        }
+
+                        let resultAtividadeDiretor = await controllerAtividadeDiretor
+                            .inserirNovaAtividadeDiretor(atividadeDiretor)
+
+                        if (!resultAtividadeDiretor.status)
+                            return customMessages.SUCCESS_CREATED_ITEM_WARNING
+                    }
 
                     customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
                     customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_CREATED_ITEM.status_code
@@ -66,8 +83,8 @@ const inserirNovoDiretor = async function (diretor, contentType) {
                     customMessages.DEFAULT_MESSAGE.response = diretor
 
                     return customMessages.DEFAULT_MESSAGE //201
-                } else { //erro 500 (Model)
-                    return customMessages.ERROR_INTERNAL_SERVER_MODEL //500
+                } else {
+                    return customMessages.ERROR_INTERNAL_SERVER_MODEL // 500
                 }
             }
         } else {
@@ -76,53 +93,79 @@ const inserirNovoDiretor = async function (diretor, contentType) {
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER //500 (controller)
     }
+
 }
 
 const atualizarDiretor = async function (diretor, id, contentType) {
-
-    let customMessage = JSON.parse(JSON.stringify(configMessages))
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-
         if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-
             let resultBuscarDiretor = await buscarDiretor(id)
 
             if (resultBuscarDiretor.status) {
-
                 let validar = await validarDados(diretor)
 
                 if (!validar) {
-
-                    diretor.id = id
+                    diretor.id = Number(id)
 
                     let result = await diretorDAO.updateDiretor(await tratarDados(diretor))
 
                     if (result) {
-                        customMessage.DEFAULT_MESSAGE.status = customMessage.SUCCESS_UPDATED_ITEM.status
-                        customMessage.DEFAULT_MESSAGE.status_code = customMessage.SUCCESS_UPDATED_ITEM.status_code
-                        customMessage.DEFAULT_MESSAGE.message = customMessage.SUCCESS_UPDATED_ITEM.message
-                        customMessage.DEFAULT_MESSAGE.response = diretor
+                        let resultDeleteFotos = await controllerFotoDiretor.excluirFotosIdDiretor(diretor.id)
 
-                        return customMessage.DEFAULT_MESSAGE //200 (Atualizado)
+                        if (resultDeleteFotos.status) {
+                            for (let itemDiretor of diretor.foto) {
+                                let fotoDiretor = {
+                                    "id_diretor": diretor.id,
+                                    "id_foto": itemDiretor.id
+                                }
+
+                                let resultFotoDiretor = await controllerFotoDiretor.inserirNovaFotoDiretor(fotoDiretor)
+
+                                if (!resultFotoDiretor.status) {
+                                    return customMessages.SUCCESS_CREATED_ITEM_WARNING
+                                }
+                            }
+                        }
+
+                        let resultDeleteAtividades = await controllerAtividadeDiretor.excluirAtividadesIdDiretor(diretor.id)
+
+                        if (resultDeleteAtividades.status) {
+                            for (let itemDiretor of diretor.atividade) {
+                                let atividadeDiretor = {
+                                    "id_diretor": diretor.id,
+                                    "id_atividade": itemDiretor.id
+                                }
+
+                                let resultAtividadeDiretor = await controllerAtividadeDiretor
+                                    .inserirNovaAtividadeDiretor(atividadeDiretor)
+
+                                if (!resultAtividadeDiretor.status)
+                                    return customMessages.SUCCESS_CREATED_ITEM_WARNING
+                            }
+                        }
+
+                        customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
+                        customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
+                        customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_UPDATE_ITEM.message
+                        customMessages.DEFAULT_MESSAGE.response = diretor
+
+                        return customMessages.DEFAULT_MESSAGE //200
                     } else {
-                        return customMessage.ERROR_INTERNAL_SERVER_MODEL //500 (Model)
+                        return customMessages.ERROR_INTERNAL_SERVER_MODEL //500 (Model)
                     }
-
                 } else {
-                    return validar //400 de validação dos campos do banco de dados
+                    return validar //400
                 }
-
             } else {
-                return resultBuscarDiretor //400(id inválido) ou 404(não encontrado) ou 500
+                return resultBuscarDiretor //400, 404 ou 500
             }
-
         } else {
-            return customMessage.ERROR_CONTENT_TYPE //415
+            return customMessages.ERROR_CONTENT_TYPE //415
         }
-
     } catch (error) {
-        return customMessage.ERROR_INTERNAL_SERVER_CONTROLLER
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER //500
     }
 }
 
@@ -133,8 +176,47 @@ const listarDiretor = async function () {
         let result = await diretorDAO.selectAllDiretor()
 
         if (result) {
-
             if (result.length > 0) {
+
+                for (let diretor of result) {
+
+                    let resultSexo = await controllerSexo.buscarSexo(diretor.id_sexo_diretor)
+
+                    if (resultSexo.status) {
+                        diretor.sexo = resultSexo.response.sexo
+                        diretor.sigla = resultSexo.response.sigla
+                        delete diretor.id_sexo_diretor
+                    }
+
+                    let resultNacionalidade = await controllerNacionalidade.buscarNacionalidade(diretor.id_nacionalidade_diretor)
+
+                    if (resultNacionalidade.status) {
+                        diretor.nacionalidade = resultNacionalidade.response.nacionalidade
+                        diretor.sigla = resultNacionalidade.response.sigla
+                        delete diretor.id_nacionalidade_diretor
+                    }
+
+                    let resultFotoDiretor = await controllerFotoDiretor.buscarFotosIdDiretor(diretor.id)
+
+                    if (resultFotoDiretor.status) {
+                        diretor.foto = resultFotoDiretor.response.foto_diretor
+                    }
+
+                    let resultAtividadeDiretor = await controllerAtividadeDiretor
+                        .buscarAtividadesIdDiretor(diretor.id)
+
+                    if (resultAtividadeDiretor.status) {
+                        diretor.atividade = resultAtividadeDiretor.response.atividade_diretor
+                    }
+
+                    let resultFIlmeDiretor = await controllerFilmeDiretor
+                        .buscarFilmesIdDiretor(diretor.id)
+
+                    if (resultFIlmeDiretor.status) {
+                        diretor.filme = resultFIlmeDiretor.response.filme_diretor
+                    }
+                }
+
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
                 customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
                 customMessages.DEFAULT_MESSAGE.response.count = result.length
@@ -142,7 +224,7 @@ const listarDiretor = async function () {
 
                 return customMessages.DEFAULT_MESSAGE
             } else {
-                return customMessages.ERROR_NOT_FOUND
+                return customMessages.ERROR_NOT_FOUND //404
             }
         } else {
             return customMessages.ERROR_INTERNAL_SERVER_MODEL //500 (model)
@@ -153,22 +235,54 @@ const listarDiretor = async function () {
 }
 
 const buscarDiretor = async function (id) {
-
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        //Validação para garantir que o ID seja um número válido
-        if (id == undefined || String(id).replaceAll(' ', '') == '' || id == null || isNaN(id) || id < 1) {
+        if (id == undefined || String(id).replaceAll(' ', '') == '' || id == null || isNaN(id) || id <= 0) {
             customMessages.ERROR_BAD_REQUEST.field = '[ID] INVÁLIDO'
-            return customMessages.ERROR_BAD_REQUEST // 400
+            return customMessages.ERROR_BAD_REQUEST //400
         } else {
-            //Chama a função do DAO para pesquisar o filme pelo id
             let result = await diretorDAO.selectByIdDiretor(id)
 
-            //Validação para verificar se o DAO retornou dados ou um false
             if (result) {
-                //Validação para verificar se o DAO tem algum dados no ARRAY
                 if (result.length > 0) {
+
+                    for (let diretor of result) {
+
+                        let resultSexo = await controllerSexo.buscarSexo(diretor.id_sexo_diretor)
+
+                        if (resultSexo.status) {
+                            diretor.sexo = resultSexo.response.sexo
+                            diretor.sigla = resultSexo.response.sigla
+                            delete diretor.id_sexo_diretor
+                        }
+
+                        let resultNacionalidade = await controllerNacionalidade.buscarNacionalidade(diretor.id_nacionalidade_diretor)
+
+                        if (resultNacionalidade.status) {
+                            diretor.nacionalidade = resultNacionalidade.response.nacionalidade
+                            diretor.sigla = resultNacionalidade.response.sigla
+                            delete diretor.id_nacionalidade_diretor
+                        }
+
+                        let resultFotoDiretor = await controllerFotoDiretor.buscarFotosIdDiretor(diretor.id)
+
+                        if (resultFotoDiretor.status)
+                            diretor.foto = resultFotoDiretor.response.foto_diretor
+
+                        let resultAtividadeDiretor = await controllerAtividadeDiretor
+                            .buscarAtividadesIdDiretor(diretor.id)
+
+                        if (resultAtividadeDiretor.status)
+                            diretor.atividade = resultAtividadeDiretor.response.atividade_diretor
+
+                        let resultFIlmeDiretor = await controllerFilmeDiretor
+                            .buscarFilmesIdDiretor(diretor.id)
+
+                        if (resultFIlmeDiretor.status)
+                            diretor.filme = resultFIlmeDiretor.response.filme_diretor
+                    }
+
                     customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
                     customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
                     customMessages.DEFAULT_MESSAGE.response.diretor = result
@@ -178,40 +292,33 @@ const buscarDiretor = async function (id) {
                     return customMessages.ERROR_NOT_FOUND //404
                 }
             } else {
-                return customMessages.ERROR_INTERNAL_SERVER_MODEL // 500 (model)
+                return customMessages.ERROR_INTERNAL_SERVER_MODEL //500 (model)
             }
         }
-
     } catch (error) {
-        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER // 500 (controller)
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER //500 (controller)
     }
 }
 
 const excluirDiretor = async function (id) {
-
-    let customMessage = JSON.parse(JSON.stringify(configMessages))
+    let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
         let resultBuscarDiretor = await buscarDiretor(id)
 
         if (resultBuscarDiretor.status) {
-
             let result = await diretorDAO.deleteDiretor(id)
 
             if (result) {
-                customMessage.DEFAULT_MESSAGE.status = customMessage.SUCCESS_DELETE_ITEM.status
-                customMessage.DEFAULT_MESSAGE.status_code = customMessage.SUCCESS_DELETE_ITEM.status_code
-                customMessage.DEFAULT_MESSAGE.message = customMessage.SUCCESS_DELETE_ITEM.message
-
-                return customMessage.DEFAULT_MESSAGE //204 (Deletado)
+                return customMessages.SUCCESS_DELETE_ITEM //204
             } else {
-                return customMessage.ERROR_INTERNAL_SERVER_MODEL //500 (Model)
+                return customMessages.ERROR_INTERNAL_SERVER_MODEL //500 (Model)
             }
         } else {
-            return resultBuscarDiretor //400(id inválido) ou 404(não encontrado) ou 500
+            return resultBuscarDiretor //400 ou 404
         }
     } catch (error) {
-        return customMessage.ERROR_INTERNAL_SERVER_CONTROLLER
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER //500 (controller)
     }
 }
 

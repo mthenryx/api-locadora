@@ -4,14 +4,14 @@ const knexDataBaseConfig = require('../../database/database_config/knexConfig.js
 
 const knexConection = knex(knexDataBaseConfig.development)
 
-const insertFilmeGenero = async function (generoFilme) {
+const insertFilmeDiretor = async function (filmeDiretor) {
     try {
-        let sql = `insert into tbl_genero_filme (
+        let sql = `insert into tbl_filme_diretor (
             id_filme,
-            id_genero
+            id_diretor
         ) values (
-            ${generoFilme.id_filme},
-            ${generoFilme.id_genero}
+            ${filmeDiretor.id_filme},
+            ${filmeDiretor.id_diretor}
         );`
 
         let result = await knexConection.raw(sql)
@@ -25,12 +25,12 @@ const insertFilmeGenero = async function (generoFilme) {
     }
 }
 
-const updateFilmeGenero = async function (generoFilme) {
+const updateFilmeDiretor = async function (filmeDiretor) {
     try {
-        let sql = `update tbl_genero_filme set
-                        id_filme    = ${generoFilme.id_filme}
-                        id_genero   = ${generoFilme.id_genero}
-                    where id = ${generoFilme.id};`
+        let sql = `update tbl_filme_diretor set
+                        id_filme    = ${filmeDiretor.id_filme}
+                        id_diretor   = ${filmeDiretor.id_diretor}
+                    where id = ${filmeDiretor.id};`
 
         let result = await knexConection.raw(sql)
 
@@ -43,9 +43,9 @@ const updateFilmeGenero = async function (generoFilme) {
     }
 }
 
-const selectAllFilmeGenero = async function () {
+const selectAllFilmeDiretor = async function () {
     try {
-        let sql = 'select * from tbl_genero_filme order by id desc;'
+        let sql = 'select * from tbl_filme_diretor order by id desc;'
 
         let result = await knexConection.raw(sql)
 
@@ -59,9 +59,9 @@ const selectAllFilmeGenero = async function () {
     }
 }
 
-const selectByIdFilmeGenero = async function (id) {
+const selectByIdFilmeDiretor = async function (id) {
     try {
-        let sql = `select * from tbl_genero_filme where id = ${id};`
+        let sql = `select * from tbl_filme_diretor where id = ${id};`
 
         let result = await knexConection.raw(sql)
 
@@ -75,15 +75,15 @@ const selectByIdFilmeGenero = async function (id) {
     }
 }
 
-const selectGenerosByIdFilme = async function (idFilme) {
+const selectDiretoresByIdFilme = async function (idFilme) {
     try {
-        let sql = ` select tbl_genero.*
+        let sql = ` select tbl_diretor.*
                     from tbl_filme
 
-                        inner join tbl_genero_filme
-                            on tbl_filme.id = tbl_genero_filme.id_filme
-                        inner join tbl_genero
-                            on tbl_genero.id = tbl_genero_filme.id_genero
+                        inner join tbl_filme_diretor
+                            on tbl_filme.id = tbl_filme_diretor.id_filme
+                        inner join tbl_diretor
+                            on tbl_diretor.id = tbl_filme_diretor.id_diretor
                     
                     where tbl_filme.id = ${idFilme};`
 
@@ -99,17 +99,17 @@ const selectGenerosByIdFilme = async function (idFilme) {
     }
 }
 
-const selectFilmesByIdGenero = async function (idGenero) {
+const selectFilmesByIdDiretor = async function (idDiretor) {
     try {
         let sql = ` select tbl_filme.*
                     from tbl_filme
                     
-                        inner join tbl_genero_filme
-                            on tbl_filme.id = tbl_genero_filme.id_filme
-                        inner join tbl_genero
-                            on tbl_genero.id = tbl_genero_filme.id_genero
+                        inner join tbl_filme_diretor
+                            on tbl_filme.id = tbl_filme_diretor.id_filme
+                        inner join tbl_diretor
+                            on tbl_diretor.id = tbl_filme_diretor.id_diretor
                     
-                    where tbl_genero.id = ${idGenero};`
+                    where tbl_diretor.id = ${idDiretor};`
 
         let result = await knexConection.raw(sql)
 
@@ -123,9 +123,9 @@ const selectFilmesByIdGenero = async function (idGenero) {
     }
 }
 
-const deleteFilmeGenero = async function (id) {
+const deleteFilmeDiretor = async function (id) {
     try {
-        let sql = `delete from tbl_genero_filme where id = ${id};`
+        let sql = `delete from tbl_filme_diretor where id = ${id};`
 
         let result = await knexConection.raw(sql)
 
@@ -138,9 +138,9 @@ const deleteFilmeGenero = async function (id) {
     }
 }
 
-const deleteGenerosByIdFilme = async function (idFilme) {
+const deleteDiretoresByIdFilme = async function (idFilme) {
     try {
-        let sql = `delete from tbl_genero_filme where id_filme = ${idFilme};`
+        let sql = `delete from tbl_filme_diretor where id_filme = ${idFilme};`
 
         let result = await knexConection.raw(sql)
 
@@ -154,12 +154,12 @@ const deleteGenerosByIdFilme = async function (idFilme) {
 }
 
 module.exports = {
-    insertFilmeGenero,
-    updateFilmeGenero,
-    selectAllFilmeGenero,
-    selectByIdFilmeGenero,
-    selectGenerosByIdFilme,
-    selectFilmesByIdGenero,
-    deleteFilmeGenero,
-    deleteGenerosByIdFilme
+    insertFilmeDiretor,
+    updateFilmeDiretor,
+    selectAllFilmeDiretor,
+    selectByIdFilmeDiretor,
+    selectDiretoresByIdFilme,
+    selectFilmesByIdDiretor,
+    deleteFilmeDiretor,
+    deleteDiretoresByIdFilme
 }

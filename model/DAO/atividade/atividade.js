@@ -4,12 +4,12 @@ const knexDataBaseConfig = require('../../database/database_config/knexConfig.js
 
 const knexConection = knex(knexDataBaseConfig.development)
 
-const insertClassificacao = async function (classificacao) {
+const insertAtividade = async function (atividade) {
     try {
-        let sql = `insert into tbl_classificacao (
-            classificacao
+        let sql = `insert into tbl_atividade (
+            atividade
         ) values (
-            replace("${classificacao.classificacao}", "'", "")
+            '${atividade.atividade}'
         );`
 
         let result = await knexConection.raw(sql)
@@ -23,11 +23,11 @@ const insertClassificacao = async function (classificacao) {
     }
 }
 
-const updateClassificacao = async function (classificacao) {
+const updateAtividade = async function (atividade) {
     try {
-        let sql = `update tbl_classificacao set
-                        classificacao = '${classificacao.classificacao}'
-                    where id = ${classificacao.id};`
+        let sql = `update tbl_atividade set
+                        atividade = '${atividade.atividade}'
+                    where id = ${atividade.id};`
 
         let result = await knexConection.raw(sql)
 
@@ -40,9 +40,9 @@ const updateClassificacao = async function (classificacao) {
     }
 }
 
-const selectAllClassificacao = async function () {
+const selectAllAtividade = async function () {
     try {
-        let sql = 'select * from tbl_classificacao order by id desc'
+        let sql = 'select * from tbl_atividade order by id desc'
 
         let result = await knexConection.raw(sql)
 
@@ -56,9 +56,9 @@ const selectAllClassificacao = async function () {
     }
 }
 
-const selectByIdClassificacao = async function (id) {
+const selectByIdAtividade = async function (id) {
     try {
-        let sql = `select * from tbl_classificacao where id = ${id}`
+        let sql = `select * from tbl_atividade where id = ${id}`
 
         let result = await knexConection.raw(sql)
 
@@ -72,9 +72,9 @@ const selectByIdClassificacao = async function (id) {
     }
 }
 
-const deleteClassificacao = async function (id) {
+const deleteAtividade = async function (id) {
     try {
-        let sql = `delete from tbl_classificacao where id = ${id};`
+        let sql = `delete from tbl_atividade where id = ${id};`
 
         let result = await knexConection.raw(sql)
 
@@ -88,9 +88,9 @@ const deleteClassificacao = async function (id) {
 }
 
 module.exports = {
-    insertClassificacao,
-    updateClassificacao,
-    selectAllClassificacao,
-    selectByIdClassificacao,
-    deleteClassificacao
+    insertAtividade,
+    updateAtividade,
+    selectAllAtividade,
+    selectByIdAtividade,
+    deleteAtividade
 }

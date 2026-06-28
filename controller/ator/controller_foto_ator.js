@@ -1,22 +1,14 @@
-/*************************************************************************************************************************
- * Objetivo: Arquivo responsável pela validação, tratamento, manipulação de dados para realizar o CRUD de GENERO
- * data: 22/05/2026
- * Autor: Matheus Henry dos Santos
- * Versão: 1.0
-**************************************************************************************************************************/
-
-//Import do arquivo de configurações de mensagens do projeto
 const configMessages = require('../modulo/configMessages.js')
 
-const filmeGeneroDAO = require('../../model/DAO/filme_genero/filme_genero.js')
+const fotoAtorDAO = require('../../model/DAO/foto_ator/foto_ator.js')
 
-const validarDados = async function (filmeGenero) {
+const validarDados = async function (fotoAtor) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
-    if (filmeGenero.id_filme == undefined || filmeGenero.id_filme == '' || filmeGenero.id_filme == null || filmeGenero.id_filme < 1 || isNaN(filmeGenero.id_filme)) {
-        customMessages.ERROR_BAD_REQUEST.field = '[ID_FILME] INVÁLIDO'
-    } else if (filmeGenero.id_genero == undefined || filmeGenero.id_genero == '' || filmeGenero.id_genero == null || filmeGenero.id_genero < 1 || isNaN(filmeGenero.id_genero)) {
-        customMessages.ERROR_BAD_REQUEST.field = '[ID_GENERO] INVÁLIDO'
+    if (fotoAtor.id_ator == undefined || fotoAtor.id_ator == '' || fotoAtor.id_ator == null || fotoAtor.id_ator < 1 || isNaN(fotoAtor.id_ator)) {
+        customMessages.ERROR_BAD_REQUEST.field = '[ID_ATOR] INVÁLIDO'
+    } else if (fotoAtor.id_foto == undefined || fotoAtor.id_foto == '' || fotoAtor.id_foto == null || fotoAtor.id_foto < 1 || isNaN(fotoAtor.id_foto)) {
+        customMessages.ERROR_BAD_REQUEST.field = '[ID_FOTO] INVÁLIDO'
     } else {
         return false
     }
@@ -24,23 +16,23 @@ const validarDados = async function (filmeGenero) {
     return customMessages.ERROR_BAD_REQUEST
 }
 
-const inserirNovoFilmeGenero = async function (filmeGenero) {
+const inserirNovaFotoAtor = async function (fotoAtor) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        let validacao = await validarDados(filmeGenero)
+        let validacao = await validarDados(fotoAtor)
         if (validacao)
             return validacao
         else {
-            let result = await filmeGeneroDAO.insertFilmeGenero(filmeGenero)
+            let result = await fotoAtorDAO.insertFotoAtor(fotoAtor)
 
             if (result) {
-                filmeGenero.id = result
+                fotoAtor.id = result
 
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_CREATED_ITEM.status
                 customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_CREATED_ITEM.status_code
                 customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_CREATED_ITEM.message
-                customMessages.DEFAULT_MESSAGE.response = filmeGenero
+                customMessages.DEFAULT_MESSAGE.response = fotoAtor
 
                 return customMessages.DEFAULT_MESSAGE
             } else {
@@ -50,30 +42,29 @@ const inserirNovoFilmeGenero = async function (filmeGenero) {
     } catch (error) {
         return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
-
 }
 
-const atualizarFilmeGenero = async function (filmeGenero, id) {
+const atualizarFotoAtor = async function (fotoAtor, id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        let resultBuscarID = await buscarGeneroFilme(id)
+        let resultBuscarID = await buscarFotoAtor(id)
 
         if (resultBuscarID.status) {
-            let validar = await validarDados(filmeGenero)
+            let validar = await validarDados(fotoAtor)
 
             if (!validar) {
-                filmeGenero.id = Number(id)
+                fotoAtor.id = Number(id)
 
-                let result = await filmeGeneroDAO.updateFilmeGenero(filmeGenero)
+                let result = await fotoAtorDAO.updateFotoAtor(fotoAtor)
 
                 if (result) {
                     customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_UPDATE_ITEM.status
                     customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_UPDATE_ITEM.status_code
                     customMessages.DEFAULT_MESSAGE.message = customMessages.SUCCESS_UPDATE_ITEM.message
-                    customMessages.DEFAULT_MESSAGE.response = filmeGenero
+                    customMessages.DEFAULT_MESSAGE.response = fotoAtor
 
-                    return customMessages.DEFAULT_MESSAGE //200 (Atualizado)
+                    return customMessages.DEFAULT_MESSAGE //200
                 } else {
                     return customMessages.ERROR_INTERNAL_SERVER_MODEL
                 }
@@ -88,46 +79,46 @@ const atualizarFilmeGenero = async function (filmeGenero, id) {
     }
 }
 
-const listarFilmeGenero = async function () {
+const listarFotoAtor = async function () {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        let result = await filmeGeneroDAO.selectAllFilmeGenero()
+        let result = await fotoAtorDAO.selectAllFotoAtor()
 
         if (result) {
             if (result.length > 0) {
                 customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
                 customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
                 customMessages.DEFAULT_MESSAGE.response.count = result.length
-                customMessages.DEFAULT_MESSAGE.response.filme_genero = result
+                customMessages.DEFAULT_MESSAGE.response.foto_ator = result
 
                 return customMessages.DEFAULT_MESSAGE
             } else {
-                return customMessages.ERROR_NOT_FOUND
+                return customMessages.ERROR_NOT_FOUND //404
             }
         } else {
-            return customMessages.ERROR_INTERNAL_SERVER_MODEL
+            return customMessages.ERROR_INTERNAL_SERVER_MODEL //500
         }
     } catch (error) {
-        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER //500
     }
 }
 
-const buscarFilmeGenero = async function (id) {
+const buscarFotoAtor = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        if (id == undefined || String(id).replaceAll(' ', '') == '' || id == null || isNaN(id) || id <= 0) {
+        if (id == undefined || String(id).replaceAll(' ', '') == '' || id == null || isNaN(id) || id < 1) {
             customMessages.ERROR_BAD_REQUEST.field = '[ID] INVÁLIDO'
             return customMessages.ERROR_BAD_REQUEST
         } else {
-            let result = await filmeGeneroDAO.selectByIdFilmeGenero(id)
+            let result = await fotoAtorDAO.selectByIdFotoAtor(id)
 
             if (result) {
                 if (result.length > 0) {
                     customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
                     customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
-                    customMessages.DEFAULT_MESSAGE.response.filme_genero = result
+                    customMessages.DEFAULT_MESSAGE.response.foto_ator = result
 
                     return customMessages.DEFAULT_MESSAGE
                 } else {
@@ -142,29 +133,28 @@ const buscarFilmeGenero = async function (id) {
     }
 }
 
-//Função para buscar os generos filtrando pelo ID do Filme
-const buscarGenerosIdFilme = async function (idFilme) {
+const buscarFotosIdAtor = async function (idAtor) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        if (idFilme == undefined || String(idFilme).replaceAll(' ', '') == '' || idFilme == null || isNaN(idFilme) || idFilme <= 0) {
-            customMessages.ERROR_BAD_REQUEST.field = '[ID_FILME] INVÁLIDO'
-            return customMessages.ERROR_BAD_REQUEST
+        if (idAtor == undefined || String(idAtor).replaceAll(' ', '') == '' || idAtor == null || isNaN(idAtor) || idAtor < 1) {
+            customMessages.ERROR_BAD_REQUEST.field = '[ID_ATOR] INVÁLIDO'
+            return customMessages.ERROR_BAD_REQUEST //400
         } else {
-            let result = await filmeGeneroDAO.selectGenerosByIdFilme(idFilme)
+            let result = await fotoAtorDAO.selectFotosByIdAtor(idAtor)
 
             if (result) {
                 if (result.length > 0) {
                     customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
                     customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
-                    customMessages.DEFAULT_MESSAGE.response.filme_genero = result
+                    customMessages.DEFAULT_MESSAGE.response.foto_ator = result
 
                     return customMessages.DEFAULT_MESSAGE
                 } else {
                     return customMessages.ERROR_NOT_FOUND
                 }
             } else {
-                return customMessages.ERROR_INTERNAL_SERVER_MODEL
+                return customMessages.ERROR_INTERNAL_SERVER_MODEL //500
             }
         }
     } catch (error) {
@@ -172,21 +162,21 @@ const buscarGenerosIdFilme = async function (idFilme) {
     }
 }
 
-const buscarFilmesIdGenero = async function (idGenero) {
+const buscarAtoresIdFoto = async function (idFoto) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        if (idGenero == undefined || String(idGenero).replaceAll(' ', '') == '' || idGenero == null || isNaN(idGenero) || idGenero <= 0) {
-            customMessages.ERROR_BAD_REQUEST.field = '[ID_GENERO] INVÁLIDO'
-            return customMessages.ERROR_BAD_REQUEST
+        if (idFoto == undefined || String(idFoto).replaceAll(' ', '') == '' || idFoto == null || isNaN(idFoto) || idFoto < 1) {
+            customMessages.ERROR_BAD_REQUEST.field = '[ID_FOTO] INVÁLIDO'
+            return customMessages.ERROR_BAD_REQUEST //400
         } else {
-            let result = await filmeGeneroDAO.selectFilmesByIdGenero(idGenero)
+            let result = await fotoAtorDAO.selectAtoresByIdFoto(idFoto)
 
             if (result) {
                 if (result.length > 0) {
                     customMessages.DEFAULT_MESSAGE.status = customMessages.SUCCESS_RESPONSE.status
                     customMessages.DEFAULT_MESSAGE.status_code = customMessages.SUCCESS_RESPONSE.status_code
-                    customMessages.DEFAULT_MESSAGE.response.filme_genero = result
+                    customMessages.DEFAULT_MESSAGE.response.foto_ator = result
 
                     return customMessages.DEFAULT_MESSAGE
                 } else {
@@ -201,14 +191,14 @@ const buscarFilmesIdGenero = async function (idGenero) {
     }
 }
 
-const excluirFilmeGenero = async function (id) {
+const excluirFotoAtor = async function (id) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        let resultBuscarID = await buscarFilmeGenero(id)
+        let resultBuscarID = await buscarFotoAtor(id)
 
         if (resultBuscarID.status) {
-            let result = await filmeGeneroDAO.deleteFilmeGenero(id)
+            let result = await fotoAtorDAO.deleteFotoAtor(id)
 
             if (result) {
                 return customMessages.SUCCESS_DELETE_ITEM
@@ -219,16 +209,15 @@ const excluirFilmeGenero = async function (id) {
             return resultBuscarID
         }
     } catch (error) {
-        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER //500 (controller)
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
 }
 
-//Função para excluir a relação de generos com o Filme
-const excluirGenerosIdFilme = async function (idFilme) {
+const excluirFotosIdAtor = async function (idAtor) {
     let customMessages = JSON.parse(JSON.stringify(configMessages))
 
     try {
-        let result = await filmeGeneroDAO.deleteGenerosByIdFilme(idFilme)
+        let result = await fotoAtorDAO.deleteFotosByIdAtor(idAtor)
 
         if (result) {
             return customMessages.SUCCESS_DELETE_ITEM
@@ -236,17 +225,17 @@ const excluirGenerosIdFilme = async function (idFilme) {
             return customMessages.ERROR_INTERNAL_SERVER_MODEL
         }
     } catch (error) {
-        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER //500 (controller)
+        return customMessages.ERROR_INTERNAL_SERVER_CONTROLLER
     }
 }
 
 module.exports = {
-    inserirNovoFilmeGenero,
-    listarFilmeGenero,
-    buscarFilmeGenero,
-    buscarGenerosIdFilme,
-    buscarFilmesIdGenero,
-    atualizarFilmeGenero,
-    excluirFilmeGenero,
-    excluirGenerosIdFilme
+    inserirNovaFotoAtor,
+    listarFotoAtor,
+    buscarFotoAtor,
+    buscarFotosIdAtor,
+    buscarAtoresIdFoto,
+    atualizarFotoAtor,
+    excluirFotoAtor,
+    excluirFotosIdAtor
 }
